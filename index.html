@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ROSC — Workforce Reality Survey</title>
+
+<!-- Rich link preview metadata (Open Graph + Twitter) -->
+<meta name="description" content="Anonymous, clinician-built workforce data platform. Burnout, staffing, leadership, retention — measured by the people who actually live it." />
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rosc-survey.vercel.app/" />
+<meta property="og:title" content="ROSC — Workforce Reality, Measured" />
+<meta property="og:description" content="Anonymous data platform built by clinicians, for clinicians. Burnout, staffing, leadership, retention — quantified for the first time. 5-min survey." />
+<meta property="og:image" content="https://rosc-survey.vercel.app/rosc-preview.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:site_name" content="ROSC" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="ROSC — Workforce Reality, Measured" />
+<meta name="twitter:description" content="Anonymous, clinician-built. The data hospitals don't want collected." />
+<meta name="twitter:image" content="https://rosc-survey.vercel.app/rosc-preview.png" />
+<meta name="theme-color" content="#0D0B08" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --bg-deep: #0D0B08;
+    --bg-warm: #1A140A;
+    --gold: #B8922A;
+    --gold-soft: #D4B156;
+    --cream: #E8E2D5;
+    --muted: #8A8275;
+    --line: rgba(184,146,42,0.15);
+    --line-strong: rgba(184,146,42,0.4);
+    --bg-card: rgba(184,146,42,0.025);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(ellipse at top, var(--bg-warm) 0%, var(--bg-deep) 60%);
+    background-attachment: fixed;
+    color: var(--cream);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .display { font-family: 'Cormorant Garamond', serif; font-weight: 500; letter-spacing: -0.01em; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* ---------- HEADER ---------- */
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+  }
+  .header-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- LAYOUT ---------- */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    position: relative;
+  }
+  .progress-fill {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    background: var(--gold);
+    transition: width 0.4s ease;
+  }
+  .progress-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .section-marker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1.05;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .section-sub {
+    color: #A8A095;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    margin-bottom: 40px;
+    max-width: 520px;
+  }
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--line-strong), rgba(184,146,42,0));
+    margin: 36px 0;
+  }
+
+  /* ---------- QUESTIONS ---------- */
+  .q { margin-bottom: 36px; }
+  .q-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .q-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+  }
+  .q-text {
+    font-size: 16px;
+    color: var(--cream);
+    font-weight: 400;
+  }
+  .q-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 12px;
+    font-style: italic;
+  }
+
+  /* radio + checkbox styles */
+  .opt-list { display: flex; flex-direction: column; gap: 6px; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: transparent;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .opt:hover { background: var(--bg-card); border-color: var(--line-strong); }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .opt-mark {
+    width: 14px; height: 14px;
+    border: 1px solid var(--muted);
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.15s;
+  }
+  .opt[data-type="radio"] .opt-mark { border-radius: 50%; }
+  .opt input:checked ~ .opt-mark {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+  .opt input:checked ~ .opt-mark::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--bg-deep);
+  }
+  .opt[data-type="radio"] input:checked ~ .opt-mark::after { border-radius: 50%; }
+  .opt input:checked ~ .opt-text { color: var(--cream); }
+  .opt-text { font-size: 14px; color: #C8C0B0; }
+  .opt:has(input:checked) {
+    border-color: var(--gold);
+    background: rgba(184,146,42,0.06);
+  }
+
+  /* Likert 1-5 */
+  .likert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .likert-end {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 100px;
+  }
+  .likert-end.right { text-align: right; }
+  .likert-buttons {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+  }
+  .likert-btn {
+    flex: 1;
+    max-width: 56px;
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .likert-btn:hover { border-color: var(--line-strong); color: var(--cream); }
+  .likert-btn.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--bg-deep);
+  }
+
+  /* Slider 1-10 */
+  .scale-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .scale-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 48px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .scale-btn:hover { border-color: var(--line-strong); color: var(--cream); }
+  .scale-btn.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--bg-deep);
+  }
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Text inputs */
+  .text-input, .text-area {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--cream);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    padding: 10px 0;
+    transition: border-color 0.2s;
+  }
+  .text-input:focus, .text-area:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+  }
+  .text-area {
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    min-height: 96px;
+    resize: vertical;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .text-area:focus { border-color: var(--gold); }
+
+  /* Select dropdown */
+  .select-wrap {
+    position: relative;
+  }
+  .select {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    padding: 14px 40px 14px 16px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .select:hover { border-color: var(--line-strong); }
+  .select:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(184,146,42,0.04);
+  }
+  .select:invalid { color: var(--muted); }
+  .select option {
+    background: var(--bg-deep);
+    color: var(--cream);
+    padding: 8px;
+  }
+  .select-caret {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    pointer-events: none;
+    font-size: 12px;
+  }
+
+  /* ---------- NAVIGATION ---------- */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .btn {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border: 1px solid var(--gold);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: transparent;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--bg-deep);
+  }
+  .btn-primary:hover { background: var(--gold-soft); border-color: var(--gold-soft); }
+  .btn-ghost {
+    color: var(--muted);
+    border-color: var(--line);
+  }
+  .btn-ghost:hover { color: var(--cream); border-color: var(--line-strong); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ---------- PAGE TRANSITIONS ---------- */
+  .page { display: none; animation: fadeIn 0.4s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- DONE STATE ---------- */
+  .done-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    padding: 56px 48px;
+    text-align: center;
+  }
+  .done-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 80px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .done-actions { display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+
+  /* ---------- RESULT / COMPARISON PAGE ---------- */
+  .result-loading {
+    text-align: center;
+    padding: 80px 20px;
+  }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(184,146,42,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .result-loading-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--muted);
+  }
+
+  .result-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .result-score {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 140px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-align: center;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    transition: color 1s ease;
+    margin-bottom: 4px;
+  }
+  .result-score.crisis    { color: #C44545; }
+  .result-score.risk      { color: #D49339; }
+  .result-score.strain    { color: #D4B156; }
+  .result-score.preserved { color: #6B8E5A; }
+
+  .result-of {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: rgba(184,146,42,0.6);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .result-band {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 12px;
+    transition: color 0.5s ease;
+  }
+  .result-band.crisis    { color: #C44545; }
+  .result-band.risk      { color: #D49339; }
+  .result-band.strain    { color: #D4B156; }
+  .result-band.preserved { color: #6B8E5A; }
+  .result-rule {
+    width: 80px;
+    height: 1px;
+    background: var(--gold);
+    margin: 16px auto 28px;
+  }
+
+  /* Sub-scores */
+  .sub-scores {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 0 auto 32px;
+    max-width: 480px;
+  }
+  .sub-score {
+    border-top: 1px solid var(--line);
+    padding: 16px 8px 0;
+    text-align: center;
+  }
+  .sub-score-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .sub-score-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Comparison */
+  .comparison {
+    margin: 32px 0 28px;
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .comparison-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .comparison-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+  }
+  .comparison-row:last-child { margin-bottom: 0; }
+  .comparison-label {
+    width: 110px;
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .comparison-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: rgba(184,146,42,0.08);
+    position: relative;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .comparison-bar {
+    position: absolute;
+    inset: 0;
+    width: 0%;
+    background: var(--gold);
+    transition: width 1.2s cubic-bezier(.4,.0,.2,1);
+    border-radius: 3px;
+  }
+  .comparison-bar.you { background: var(--gold-soft); }
+  .comparison-value {
+    width: 38px;
+    flex-shrink: 0;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+  }
+  .comparison-note {
+    margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .result-msg {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--cream);
+    text-align: center;
+    margin: 28px auto;
+    max-width: 460px;
+  }
+  .result-msg em {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 500;
+  }
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .result-footer {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  .result-thanks {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .result-handle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: rgba(184,146,42,0.6);
+    text-transform: uppercase;
+  }
+
+  /* Already-responded notice */
+  .already-banner {
+    background: rgba(184,146,42,0.08);
+    border: 1px solid rgba(184,146,42,0.3);
+    padding: 18px 22px;
+    margin: 0 0 28px;
+    text-align: center;
+  }
+  .already-banner-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .already-banner-text {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    color: var(--cream);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .already-banner button {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 8px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  /* ---------- HIDDEN SHARE CARD ----------
+     Rendered off-screen at fixed 1080x1920. When the user taps share,
+     html2canvas converts it to a PNG that drops into their share sheet.
+     ALL units MUST be fixed pixels (not vw/vh) so the rendered output
+     is consistent regardless of viewport.
+  */
+  #shareCardOffscreen {
+    position: fixed;
+    left: -9999px;
+    top: 0;
+    width: 1080px;
+    height: 1920px;
+    pointer-events: none;
+    z-index: -1;
+  }
+  #shareCard {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    background: #0D0B08;
+    overflow: hidden;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: #E8E2D5;
+  }
+  #shareCard .sc-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 1200px 800px at 50% 0%, rgba(184,146,42,0.25) 0%, rgba(184,146,42,0) 60%),
+      radial-gradient(ellipse at top, #1A140A 0%, #0D0B08 55%);
+  }
+  #shareCard .sc-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 110px 80px 90px;
+  }
+  #shareCard .sc-topmark {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 52px;
+    letter-spacing: 0.42em;
+    color: #B8922A;
+    margin-bottom: 110px;
+  }
+  #shareCard .sc-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 26px;
+    letter-spacing: 0.32em;
+    color: #B8922A;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+  #shareCard .sc-score {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 380px;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: #B8922A;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 14px;
+  }
+  #shareCard .sc-score.crisis    { color: #C44545; }
+  #shareCard .sc-score.risk      { color: #D49339; }
+  #shareCard .sc-score.strain    { color: #D4B156; }
+  #shareCard .sc-score.preserved { color: #6B8E5A; }
+  #shareCard .sc-of {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    letter-spacing: 0.3em;
+    color: rgba(184,146,42,0.55);
+    text-transform: uppercase;
+    margin-bottom: 50px;
+  }
+  #shareCard .sc-band {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 80px;
+    color: #E8E2D5;
+    margin-bottom: 14px;
+  }
+  #shareCard .sc-band.crisis    { color: #C44545; }
+  #shareCard .sc-band.risk      { color: #D49339; }
+  #shareCard .sc-band.strain    { color: #D4B156; }
+  #shareCard .sc-band.preserved { color: #6B8E5A; }
+  #shareCard .sc-rule {
+    width: 120px;
+    height: 2px;
+    background: #B8922A;
+    margin: 30px 0 60px;
+  }
+  #shareCard .sc-subgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 70px;
+  }
+  #shareCard .sc-sub {
+    border-top: 1px solid rgba(184,146,42,0.4);
+    padding: 30px 8px 0;
+    text-align: center;
+  }
+  #shareCard .sc-sub-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    color: rgba(184,146,42,0.7);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  #shareCard .sc-sub-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1;
+    color: #E8E2D5;
+    font-variant-numeric: tabular-nums;
+  }
+  #shareCard .sc-divider {
+    flex: 1;
+  }
+  #shareCard .sc-cta-block {
+    margin-bottom: 60px;
+  }
+  #shareCard .sc-cta-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 64px;
+    color: #E8E2D5;
+    margin-bottom: 28px;
+  }
+  #shareCard .sc-cta-url {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 32px;
+    letter-spacing: 0.1em;
+    color: #B8922A;
+    margin-bottom: 16px;
+  }
+  #shareCard .sc-cta-handle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    letter-spacing: 0.25em;
+    color: rgba(184,146,42,0.6);
+  }
+  #shareCard .sc-bottommark {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: 0.42em;
+    color: rgba(184,146,42,0.5);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 28px 32px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 60px;
+  }
+  footer .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 600px) {
+    main { padding: 28px 20px 60px; }
+    .section-title { font-size: 32px; }
+    .likert-end { width: 70px; font-size: 9px; }
+    .likert-btn { font-size: 18px; }
+    header { padding: 14px 20px; }
+    .brand { font-size: 22px; }
+    .header-meta { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">ROSC</div>
+  <div class="header-meta">Anonymous · ~5 min</div>
+</header>
+
+<main>
+  <!-- progress -->
+  <div class="progress-row">
+    <span class="progress-text" id="progressLabel">Section I of V</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+  </div>
+
+  <form id="roscForm" autocomplete="off">
+
+    <!-- ============================================== -->
+    <!-- PAGE 1 — PROVIDER PROFILE -->
+    <!-- ============================================== -->
+    <section class="page active" data-page="1">
+      <div class="already-banner" id="alreadyBanner" style="display:none;">
+        <div class="already-banner-title">Looks like you've already responded</div>
+        <div class="already-banner-text">Thanks — your data is in. If you want to take it again (different role, different unit, or you're someone else on this device), continue below.</div>
+        <button type="button" id="dismissAlready">Continue anyway</button>
+      </div>
+      <div class="section-marker">Section I · Provider Profile</div>
+      <h1 class="section-title">Tell us where you stand.</h1>
+      <p class="section-sub">All responses are anonymous. We collect role and location to give your unit a meaningful score — never to identify you.</p>
+
+      <div class="q" data-q="Q1">
+        <div class="q-label"><span class="q-num">Q1</span><span class="q-text">Primary clinical role</span></div>
+        <div class="opt-list" data-radio="Q1">
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="RN" required><span class="opt-mark"></span><span class="opt-text">Registered Nurse (RN)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="NP"><span class="opt-mark"></span><span class="opt-text">Nurse Practitioner (NP)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="CRNA"><span class="opt-mark"></span><span class="opt-text">Certified Registered Nurse Anesthetist (CRNA)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="PA"><span class="opt-mark"></span><span class="opt-text">Physician Assistant (PA)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="MD/DO"><span class="opt-mark"></span><span class="opt-text">Physician (MD / DO)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="RT"><span class="opt-mark"></span><span class="opt-text">Respiratory Therapist (RT)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="Pharmacist"><span class="opt-mark"></span><span class="opt-text">Pharmacist</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="PT/OT"><span class="opt-mark"></span><span class="opt-text">PT / OT</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="Tech"><span class="opt-mark"></span><span class="opt-text">Technician</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="Student/Resident/Fellow"><span class="opt-mark"></span><span class="opt-text">Student / Resident / Fellow</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q1" value="Other"><span class="opt-mark"></span><span class="opt-text">Other</span></label>
+        </div>
+        <input class="text-input other-input" type="text" id="Q1other" data-for="Q1" placeholder="Please specify your role" style="display:none; margin-top:12px;" />
+      </div>
+        <div class="q-label"><span class="q-num">Q2</span><span class="q-text">Primary specialty or unit</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="ICU" required><span class="opt-mark"></span><span class="opt-text">ICU</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Emergency Dept"><span class="opt-mark"></span><span class="opt-text">Emergency Dept</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="OR / Perioperative"><span class="opt-mark"></span><span class="opt-text">OR / Perioperative</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Labor & Delivery"><span class="opt-mark"></span><span class="opt-text">Labor & Delivery</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Medical-Surgical"><span class="opt-mark"></span><span class="opt-text">Medical-Surgical</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Oncology"><span class="opt-mark"></span><span class="opt-text">Oncology</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Psychiatry"><span class="opt-mark"></span><span class="opt-text">Psychiatry</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Primary Care"><span class="opt-mark"></span><span class="opt-text">Primary Care</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Cardiology"><span class="opt-mark"></span><span class="opt-text">Cardiology</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Pediatrics/NICU/PICU"><span class="opt-mark"></span><span class="opt-text">Pediatrics / NICU / PICU</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q2" value="Other"><span class="opt-mark"></span><span class="opt-text">Other</span></label>
+        </div>
+        <input class="text-input other-input" type="text" id="Q2other" data-for="Q2" placeholder="Please specify your specialty or unit" style="display:none; margin-top:12px;" />
+      </div>
+
+      <div class="q" data-q="Q3">
+        <div class="q-label"><span class="q-num">Q3</span><span class="q-text">Facility type</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Large Academic / Teaching Hospital (500+ beds)" required><span class="opt-mark"></span><span class="opt-text">Large Academic / Teaching Hospital (500+ beds)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Regional Hospital (200-499 beds)"><span class="opt-mark"></span><span class="opt-text">Regional Hospital (200–499 beds)</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Small Community Hospital"><span class="opt-mark"></span><span class="opt-text">Small Community Hospital</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Outpatient / Ambulatory"><span class="opt-mark"></span><span class="opt-text">Outpatient / Ambulatory</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Long-Term Care / SNF"><span class="opt-mark"></span><span class="opt-text">Long-Term Care / SNF</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Travel / Per Diem"><span class="opt-mark"></span><span class="opt-text">Travel / Per Diem</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q3" value="Other"><span class="opt-mark"></span><span class="opt-text">Other</span></label>
+        </div>
+        <input class="text-input other-input" type="text" id="Q3other" data-for="Q3" placeholder="Please specify your facility type" style="display:none; margin-top:12px;" />
+      </div>
+
+      <div class="q" data-q="Q4">
+        <div class="q-label"><span class="q-num">Q4</span><span class="q-text">Hospital or health system</span></div>
+        <div class="select-wrap">
+          <select class="select" name="Q4" id="Q4select" required>
+            <option value="" disabled selected>— Select your system —</option>
+            <option value="AdventHealth">AdventHealth</option>
+            <option value="Advocate Health">Advocate Health</option>
+            <option value="Allegheny Health Network">Allegheny Health Network</option>
+            <option value="Ascension">Ascension</option>
+            <option value="Atlantic Health System">Atlantic Health System</option>
+            <option value="Atrium Health">Atrium Health</option>
+            <option value="Banner Health">Banner Health</option>
+            <option value="Baptist Health">Baptist Health</option>
+            <option value="Baylor Scott & White Health">Baylor Scott &amp; White Health</option>
+            <option value="BJC HealthCare">BJC HealthCare</option>
+            <option value="Carilion Clinic">Carilion Clinic</option>
+            <option value="Cedars-Sinai">Cedars-Sinai</option>
+            <option value="ChristianaCare">ChristianaCare</option>
+            <option value="Cleveland Clinic">Cleveland Clinic</option>
+            <option value="CommonSpirit Health">CommonSpirit Health</option>
+            <option value="Cooper University Health Care">Cooper University Health Care</option>
+            <option value="Corewell Health">Corewell Health</option>
+            <option value="Dartmouth Health">Dartmouth Health</option>
+            <option value="Duke Health">Duke Health</option>
+            <option value="Emory Healthcare">Emory Healthcare</option>
+            <option value="Geisinger">Geisinger</option>
+            <option value="Hackensack Meridian Health">Hackensack Meridian Health</option>
+            <option value="Hartford HealthCare">Hartford HealthCare</option>
+            <option value="HCA Healthcare">HCA Healthcare</option>
+            <option value="Henry Ford Health">Henry Ford Health</option>
+            <option value="Hospital for Special Surgery">Hospital for Special Surgery</option>
+            <option value="Houston Methodist">Houston Methodist</option>
+            <option value="Indiana University Health">Indiana University Health</option>
+            <option value="Inova Health System">Inova Health System</option>
+            <option value="Intermountain Health">Intermountain Health</option>
+            <option value="Jackson Health System">Jackson Health System</option>
+            <option value="Jefferson Health">Jefferson Health</option>
+            <option value="Johns Hopkins Medicine">Johns Hopkins Medicine</option>
+            <option value="Kaiser Permanente">Kaiser Permanente</option>
+            <option value="Mass General Brigham">Mass General Brigham</option>
+            <option value="Mayo Clinic">Mayo Clinic</option>
+            <option value="MD Anderson Cancer Center">MD Anderson Cancer Center</option>
+            <option value="Memorial Hermann Health System">Memorial Hermann Health System</option>
+            <option value="Memorial Sloan Kettering Cancer Center">Memorial Sloan Kettering</option>
+            <option value="Michigan Medicine">Michigan Medicine (U-M)</option>
+            <option value="Mount Sinai Health System">Mount Sinai Health System</option>
+            <option value="NewYork-Presbyterian">NewYork-Presbyterian</option>
+            <option value="Northwell Health">Northwell Health</option>
+            <option value="Northwestern Medicine">Northwestern Medicine</option>
+            <option value="NYU Langone Health">NYU Langone Health</option>
+            <option value="OhioHealth">OhioHealth</option>
+            <option value="OHSU">Oregon Health &amp; Science University</option>
+            <option value="Penn Medicine">Penn Medicine</option>
+            <option value="Providence">Providence</option>
+            <option value="Rush University Medical Center">Rush University Medical Center</option>
+            <option value="RWJBarnabas Health">RWJBarnabas Health</option>
+            <option value="Scripps Health">Scripps Health</option>
+            <option value="Sentara Health">Sentara Health</option>
+            <option value="Sharp HealthCare">Sharp HealthCare</option>
+            <option value="SSM Health">SSM Health</option>
+            <option value="Stanford Health Care">Stanford Health Care</option>
+            <option value="Stony Brook Medicine">Stony Brook Medicine</option>
+            <option value="Sutter Health">Sutter Health</option>
+            <option value="Tampa General Hospital">Tampa General Hospital</option>
+            <option value="Tenet Healthcare">Tenet Healthcare</option>
+            <option value="Texas Health Resources">Texas Health Resources</option>
+            <option value="The Ohio State University Wexner Medical Center">Ohio State Wexner Medical Center</option>
+            <option value="Trinity Health">Trinity Health</option>
+            <option value="UC Davis Health">UC Davis Health</option>
+            <option value="UC San Diego Health">UC San Diego Health</option>
+            <option value="UCLA Health">UCLA Health</option>
+            <option value="UCSF Health">UCSF Health</option>
+            <option value="UNC Health">UNC Health</option>
+            <option value="UPMC">UPMC</option>
+            <option value="UT Southwestern Medical Center">UT Southwestern Medical Center</option>
+            <option value="Vanderbilt University Medical Center">Vanderbilt University Medical Center</option>
+            <option value="VA Health Care">Veterans Affairs (VA) Health Care</option>
+            <option value="Virginia Commonwealth University Health">Virginia Commonwealth University Health</option>
+            <option value="WellSpan Health">WellSpan Health</option>
+            <option value="Westchester Medical Center">Westchester Medical Center</option>
+            <option value="Yale New Haven Health">Yale New Haven Health</option>
+            <option value="__OTHER__">Other (not listed) →</option>
+          </select>
+          <span class="select-caret">▾</span>
+        </div>
+        <input class="text-input" type="text" id="Q4other" placeholder="Type your hospital or system name" style="display:none; margin-top:12px;" />
+      </div>
+
+      <div class="q" data-q="Q5">
+        <div class="q-label"><span class="q-num">Q5</span><span class="q-text">Specific campus<span class="q-hint">optional</span></span></div>
+        <input class="text-input" type="text" name="Q5" placeholder="e.g. Stony Brook University Hospital, East Setauket" />
+      </div>
+
+      <div class="q" data-q="Q6">
+        <div class="q-label"><span class="q-num">Q6</span><span class="q-text">Shift type</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q6" value="Day Shift" required><span class="opt-mark"></span><span class="opt-text">Day Shift</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q6" value="Night Shift"><span class="opt-mark"></span><span class="opt-text">Night Shift</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q6" value="Rotating"><span class="opt-mark"></span><span class="opt-text">Rotating</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q6" value="On-Call / PRN"><span class="opt-mark"></span><span class="opt-text">On-Call / PRN</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q6" value="Standard Business Hours"><span class="opt-mark"></span><span class="opt-text">Standard Business Hours</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q7">
+        <div class="q-label"><span class="q-num">Q7</span><span class="q-text">Years in current role</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q7" value="<1 year" required><span class="opt-mark"></span><span class="opt-text">Less than 1 year</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q7" value="1-3 years"><span class="opt-mark"></span><span class="opt-text">1–3 years</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q7" value="4-7 years"><span class="opt-mark"></span><span class="opt-text">4–7 years</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q7" value="8-15 years"><span class="opt-mark"></span><span class="opt-text">8–15 years</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q7" value="15+ years"><span class="opt-mark"></span><span class="opt-text">15+ years</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q8">
+        <div class="q-label"><span class="q-num">Q8</span><span class="q-text">U.S. region</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q8" value="Northeast" required><span class="opt-mark"></span><span class="opt-text">Northeast</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q8" value="Southeast"><span class="opt-mark"></span><span class="opt-text">Southeast</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q8" value="Midwest"><span class="opt-mark"></span><span class="opt-text">Midwest</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q8" value="Southwest"><span class="opt-mark"></span><span class="opt-text">Southwest</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q8" value="West"><span class="opt-mark"></span><span class="opt-text">West</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q8" value="Prefer not to say"><span class="opt-mark"></span><span class="opt-text">Prefer not to say</span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PAGE 2 — BURNOUT & WORKPLACE CLIMATE -->
+    <!-- ============================================== -->
+    <section class="page" data-page="2">
+      <div class="section-marker">Section II · Burnout & Workplace Climate</div>
+      <h1 class="section-title">Where you really are.</h1>
+      <p class="section-sub">Adapted from the Mini-Z 2.0 (Linzer et al.), distributed via AMA STEPS Forward™. Answer based on the past 30 days.</p>
+
+      <div class="q" data-q="Q9">
+        <div class="q-label"><span class="q-num">Q9</span><span class="q-text">Using your own definition of burnout, how would you rate yourself right now?</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q9" value="I enjoy my work, no symptoms of burnout" required><span class="opt-mark"></span><span class="opt-text">I enjoy my work, no symptoms of burnout</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q9" value="Occasionally under stress, no burnout"><span class="opt-mark"></span><span class="opt-text">Occasionally under stress, no burnout</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q9" value="Definitely burning out"><span class="opt-mark"></span><span class="opt-text">Definitely burning out — one or more symptoms</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q9" value="Burnout symptoms won't go away"><span class="opt-mark"></span><span class="opt-text">Burnout symptoms won't go away</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q9" value="Completely burned out"><span class="opt-mark"></span><span class="opt-text">Completely burned out — I may need help</span></label>
+        </div>
+      </div>
+
+      <div id="likertGroup1"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PAGE 3 — EMPLOYER ACCOUNTABILITY -->
+    <!-- ============================================== -->
+    <section class="page" data-page="3">
+      <div class="section-marker">Section III · Employer Accountability</div>
+      <h1 class="section-title">How the system performs.</h1>
+      <p class="section-sub">The conditions your organization has created — staffing, leadership, safety. This is what hospitals are measured on.</p>
+
+      <div class="q" data-q="Q19">
+        <div class="q-label"><span class="q-num">Q19</span><span class="q-text">Patients per shift (typical)</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q19" value="1-4 patients" required><span class="opt-mark"></span><span class="opt-text">1–4 patients</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q19" value="5-7 patients"><span class="opt-mark"></span><span class="opt-text">5–7 patients</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q19" value="8-10 patients"><span class="opt-mark"></span><span class="opt-text">8–10 patients</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q19" value="11-15 patients"><span class="opt-mark"></span><span class="opt-text">11–15 patients</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q19" value="16+ patients"><span class="opt-mark"></span><span class="opt-text">16+ patients</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q19" value="Not applicable"><span class="opt-mark"></span><span class="opt-text">Not applicable to my role</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q20">
+        <div class="q-label"><span class="q-num">Q20</span><span class="q-text">Do staffing ratios feel safe?</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q20" value="Yes, consistently" required><span class="opt-mark"></span><span class="opt-text">Yes, consistently</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q20" value="Sometimes"><span class="opt-mark"></span><span class="opt-text">Sometimes</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q20" value="Rarely"><span class="opt-mark"></span><span class="opt-text">Rarely</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q20" value="No, almost never"><span class="opt-mark"></span><span class="opt-text">No, almost never</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q21">
+        <div class="q-label"><span class="q-num">Q21</span><span class="q-text">Did you receive a structured orientation?</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q21" value="Comprehensive" required><span class="opt-mark"></span><span class="opt-text">Comprehensive</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q21" value="Partial"><span class="opt-mark"></span><span class="opt-text">Partial</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q21" value="Minimal"><span class="opt-mark"></span><span class="opt-text">Minimal</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q21" value="None"><span class="opt-mark"></span><span class="opt-text">None</span></label>
+        </div>
+      </div>
+
+      <div id="likertGroup2"></div>
+
+      <div class="q" data-q="Q26">
+        <div class="q-label"><span class="q-num">Q26</span><span class="q-text">Has understaffing ever compromised patient care in your unit?</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q26" value="No" required><span class="opt-mark"></span><span class="opt-text">No</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q26" value="Rarely"><span class="opt-mark"></span><span class="opt-text">Rarely</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q26" value="Occasionally"><span class="opt-mark"></span><span class="opt-text">Occasionally</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q26" value="Regularly"><span class="opt-mark"></span><span class="opt-text">Regularly</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q27">
+        <div class="q-label"><span class="q-num">Q27</span><span class="q-text">Job changes in the last 3 years</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q27" value="0" required><span class="opt-mark"></span><span class="opt-text">None</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q27" value="1"><span class="opt-mark"></span><span class="opt-text">1 change</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q27" value="2"><span class="opt-mark"></span><span class="opt-text">2 changes</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q27" value="3+"><span class="opt-mark"></span><span class="opt-text">3 or more</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q28">
+        <div class="q-label"><span class="q-num">Q28</span><span class="q-text">Why did you leave your last position? <span class="q-hint">select all that apply</span></span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Burnout"><span class="opt-mark"></span><span class="opt-text">Burnout</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Unsafe ratios"><span class="opt-mark"></span><span class="opt-text">Unsafe ratios</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Poor leadership"><span class="opt-mark"></span><span class="opt-text">Poor leadership</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Compensation"><span class="opt-mark"></span><span class="opt-text">Compensation</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Schedule"><span class="opt-mark"></span><span class="opt-text">Schedule</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Career advancement"><span class="opt-mark"></span><span class="opt-text">Career advancement</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Relocation"><span class="opt-mark"></span><span class="opt-text">Relocation</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="First position"><span class="opt-mark"></span><span class="opt-text">This is my first position</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q28" value="Other"><span class="opt-mark"></span><span class="opt-text">Other</span></label>
+        </div>
+        <input class="text-input other-input" type="text" id="Q28other" data-for="Q28" placeholder="Please specify (optional)" style="display:none; margin-top:12px;" />
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PAGE 4 — INTENT & RETENTION -->
+    <!-- ============================================== -->
+    <section class="page" data-page="4">
+      <div class="section-marker">Section IV · Intent & Retention</div>
+      <h1 class="section-title">Where you're headed.</h1>
+      <p class="section-sub">The retention signal hospitals can't see in their own surveys — because nobody answers honestly internally.</p>
+
+      <div class="q" data-q="Q29">
+        <div class="q-label"><span class="q-num">Q29</span><span class="q-text">Are you currently considering leaving?</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q29" value="No, plan to stay" required><span class="opt-mark"></span><span class="opt-text">No, I plan to stay</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q29" value="Undecided"><span class="opt-mark"></span><span class="opt-text">Undecided</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q29" value="Passively open"><span class="opt-mark"></span><span class="opt-text">Passively open to leaving</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q29" value="Actively looking"><span class="opt-mark"></span><span class="opt-text">Actively looking</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q30">
+        <div class="q-label"><span class="q-num">Q30</span><span class="q-text">What would change your mind? <span class="q-hint">select up to 3</span></span></div>
+        <div class="opt-list" id="q30List">
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Safer ratios"><span class="opt-mark"></span><span class="opt-text">Safer ratios</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Higher pay"><span class="opt-mark"></span><span class="opt-text">Higher pay</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Better leadership"><span class="opt-mark"></span><span class="opt-text">Better leadership</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Schedule flexibility"><span class="opt-mark"></span><span class="opt-text">Schedule flexibility</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="More support staff"><span class="opt-mark"></span><span class="opt-text">More support staff</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Less documentation"><span class="opt-mark"></span><span class="opt-text">Less documentation</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Better team culture"><span class="opt-mark"></span><span class="opt-text">Better team culture</span></label>
+          <label class="opt" data-type="checkbox"><input type="checkbox" name="Q30" value="Nothing"><span class="opt-mark"></span><span class="opt-text">Nothing would change my mind</span></label>
+        </div>
+      </div>
+
+      <div class="q" data-q="Q31">
+        <div class="q-label"><span class="q-num">Q31</span><span class="q-text">Likelihood you will leave in the next 12 months</span></div>
+        <div class="scale-row" id="scale10"></div>
+        <div class="scale-labels"><span>Very unlikely</span><span>Very likely</span></div>
+        <input type="hidden" name="Q31" id="Q31value" required />
+      </div>
+
+      <div class="q" data-q="Q32">
+        <div class="q-label"><span class="q-num">Q32</span><span class="q-text">Would you recommend your employer to a colleague?</span></div>
+        <div class="opt-list">
+          <label class="opt" data-type="radio"><input type="radio" name="Q32" value="Yes, strongly" required><span class="opt-mark"></span><span class="opt-text">Yes, strongly</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q32" value="Yes, with caveats"><span class="opt-mark"></span><span class="opt-text">Yes, with caveats</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q32" value="No"><span class="opt-mark"></span><span class="opt-text">No</span></label>
+          <label class="opt" data-type="radio"><input type="radio" name="Q32" value="Absolutely not"><span class="opt-mark"></span><span class="opt-text">Absolutely not</span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PAGE 5 — YOUR VOICE -->
+    <!-- ============================================== -->
+    <section class="page" data-page="5">
+      <div class="section-marker">Section V · Your Voice</div>
+      <h1 class="section-title">In your own words.</h1>
+      <p class="section-sub">The qualitative layer the numbers can't capture. Anonymous, unfiltered, optional. Your verbatim words may appear in aggregated reports — never identifying details.</p>
+
+      <div class="q" data-q="Q33">
+        <div class="q-label"><span class="q-num">Q33</span><span class="q-text">One thing about your workplace that job postings never mention</span></div>
+        <textarea class="text-area" name="Q33" placeholder="Write what you'd want a colleague to know before they signed."></textarea>
+      </div>
+
+      <div class="q" data-q="Q34">
+        <div class="q-label"><span class="q-num">Q34</span><span class="q-text">What would you tell a new grad before they accepted a position here?</span></div>
+        <textarea class="text-area" name="Q34" placeholder="Honest, specific, useful."></textarea>
+      </div>
+
+      <div class="q" data-q="Q35">
+        <div class="q-label"><span class="q-num">Q35</span><span class="q-text">The single change that would most improve your likelihood of staying</span></div>
+        <textarea class="text-area" name="Q35" placeholder="One thing. The one thing."></textarea>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- DONE / COMPARISON -->
+    <!-- ============================================== -->
+    <section class="page" data-page="6">
+      <div id="resultStage">
+        <!-- Loading state -->
+        <div id="resultLoading" class="result-loading">
+          <div class="spinner"></div>
+          <div class="result-loading-text">Calculating your ROSC score...</div>
+        </div>
+
+        <!-- Result card -->
+        <div id="resultCard" style="display:none;">
+          <div class="result-eyebrow">Your ROSC Score</div>
+          <div class="result-score" id="resultScoreNum">0</div>
+          <div class="result-of">— out of 100 —</div>
+          <div class="result-band" id="resultBand">—</div>
+          <div class="result-rule"></div>
+
+          <!-- Three sub-scores -->
+          <div class="sub-scores">
+            <div class="sub-score">
+              <div class="sub-score-label">Burnout</div>
+              <div class="sub-score-num" id="subBI">0</div>
+            </div>
+            <div class="sub-score">
+              <div class="sub-score-label">Employer</div>
+              <div class="sub-score-num" id="subEAS">0</div>
+            </div>
+            <div class="sub-score">
+              <div class="sub-score-label">Retention</div>
+              <div class="sub-score-num" id="subRRI">0</div>
+            </div>
+          </div>
+
+          <!-- Comparison -->
+          <div class="comparison" id="comparisonBlock">
+            <div class="comparison-eyebrow">How you compare</div>
+            <div class="comparison-bars" id="comparisonBars">
+              <!-- filled in by JS -->
+            </div>
+          </div>
+
+          <!-- Personal message -->
+          <div class="result-msg" id="resultMsg"></div>
+
+          <!-- Share / CTA -->
+          <div class="result-actions">
+            <button type="button" class="btn btn-primary" id="shareBtn">📲 Share my score</button>
+            <button type="button" class="btn btn-ghost" id="downloadBtn">Download response (JSON)</button>
+          </div>
+
+          <div class="result-footer">
+            <div class="result-thanks">Thank you. Your response is anonymous and aggregated.</div>
+            <div class="result-handle">@rosc_official1</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== HIDDEN SHARE CARD (rendered to image on demand) ============== -->
+      <div id="shareCardOffscreen" aria-hidden="true">
+        <div id="shareCard">
+          <div class="sc-bg"></div>
+          <div class="sc-content">
+            <div class="sc-topmark">R O S C</div>
+
+            <div class="sc-eyebrow">My ROSC Score</div>
+            <div class="sc-score" id="scScore">—</div>
+            <div class="sc-of">— out of 100 —</div>
+
+            <div class="sc-band" id="scBand">—</div>
+            <div class="sc-rule"></div>
+
+            <div class="sc-subgrid">
+              <div class="sc-sub">
+                <div class="sc-sub-label">Burnout</div>
+                <div class="sc-sub-num" id="scBI">—</div>
+              </div>
+              <div class="sc-sub">
+                <div class="sc-sub-label">Employer</div>
+                <div class="sc-sub-num" id="scEAS">—</div>
+              </div>
+              <div class="sc-sub">
+                <div class="sc-sub-label">Retention</div>
+                <div class="sc-sub-num" id="scRRI">—</div>
+              </div>
+            </div>
+
+            <div class="sc-divider"></div>
+
+            <div class="sc-cta-block">
+              <div class="sc-cta-line">Take yours.</div>
+              <div class="sc-cta-url">rosc-survey.vercel.app</div>
+              <div class="sc-cta-handle">@rosc_official1</div>
+            </div>
+
+            <div class="sc-bottommark">REVIVE · OPTIMIZE · SUSTAIN · COMMIT</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- NAV -->
+    <!-- ============================================== -->
+    <div class="nav-row" id="navRow">
+      <button type="button" class="btn btn-ghost" id="backBtn" disabled>← Back</button>
+      <button type="button" class="btn btn-primary" id="nextBtn">Continue →</button>
+    </div>
+  </form>
+</main>
+
+<footer>
+  <div class="tagline">REVIVE · OPTIMIZE · SUSTAIN · COMMIT</div>
+  <div>ROSC Workforce Intelligence · Anonymous · n &gt; 5 suppression</div>
+</footer>
+
+<script>
+/* ============================================================
+   ROSC Survey — submission + navigation logic
+   ============================================================
+   BACKEND: Google Sheets (via Apps Script)
+
+   Paste your Apps Script Web App URL below. It looks like:
+     https://script.google.com/macros/s/AKfycbx......./exec
+
+   See WALKTHROUGH_GOOGLE_SHEETS.md for setup steps.
+   If left as null, the form collects data locally and offers
+   a JSON download (useful for testing).
+*/
+const SUBMIT_ENDPOINT = "https://script.google.com/macros/s/AKfycbwMWJiyHsO0r8L9e8VrPLaYgdWEpGg_O2p7Fv71XXBY56dQ0DeXq0skMQryJkJYjnOm/exec";  // wired to Google Sheets
+const FORM_NAME = "rosc-survey-v1";
+
+const TOTAL_PAGES = 5;
+let currentPage = 1;
+const formData = {};
+
+/* ---------- Build Likert blocks dynamically ---------- */
+const likertItemsP2 = [
+  ["Q10", "I am satisfied with my current job"],
+  ["Q11", "My workload is manageable"],
+  ["Q12", "I have adequate time for documentation"],
+  ["Q13", "My organization's values align with my own"],
+  ["Q14", "I feel supported by my immediate supervisor"],
+  ["Q15", "There is good teamwork in my primary work area"],
+  ["Q16", "I am satisfied with my current EMR system"],
+  ["Q17", "I am proud to work at my current organization"],
+  ["Q18", "The atmosphere in my primary work area is chaotic"],
+];
+
+const likertItemsP3 = [
+  ["Q22", "I can take an uninterrupted meal break"],
+  ["Q23", "Compensation is appropriate for my workload and stress"],
+  ["Q24", "Leadership actively addresses staffing issues"],
+  ["Q25", "I feel psychologically safe raising patient safety concerns"],
+];
+
+function buildLikert(name, label) {
+  const wrap = document.createElement("div");
+  wrap.className = "q";
+  wrap.dataset.q = name;
+  wrap.innerHTML = `
+    <div class="q-label">
+      <span class="q-num">${name}</span>
+      <span class="q-text">${label}</span>
+    </div>
+    <div class="likert">
+      <span class="likert-end">Strongly Disagree</span>
+      <div class="likert-buttons">
+        ${[1,2,3,4,5].map(n => `<button type="button" class="likert-btn" data-name="${name}" data-val="${n}">${n}</button>`).join("")}
+      </div>
+      <span class="likert-end right">Strongly Agree</span>
+    </div>
+    <input type="hidden" name="${name}" required />
+  `;
+  return wrap;
+}
+
+const g1 = document.getElementById("likertGroup1");
+likertItemsP2.forEach(([n,l]) => g1.appendChild(buildLikert(n,l)));
+const g2 = document.getElementById("likertGroup2");
+likertItemsP3.forEach(([n,l]) => g2.appendChild(buildLikert(n,l)));
+
+/* Likert click behavior */
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".likert-btn");
+  if (!btn) return;
+  const name = btn.dataset.name;
+  document.querySelectorAll(`.likert-btn[data-name="${name}"]`).forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  document.querySelector(`input[type="hidden"][name="${name}"]`).value = btn.dataset.val;
+});
+
+/* ---------- Build Q31 1–10 scale ---------- */
+const scale10 = document.getElementById("scale10");
+for (let i = 1; i <= 10; i++) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "scale-btn";
+  b.dataset.val = i;
+  b.textContent = i;
+  scale10.appendChild(b);
+}
+scale10.addEventListener("click", e => {
+  const btn = e.target.closest(".scale-btn");
+  if (!btn) return;
+  document.querySelectorAll("#scale10 .scale-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  document.getElementById("Q31value").value = btn.dataset.val;
+});
+
+/* ---------- Q30 max-3 enforcement ---------- */
+document.getElementById("q30List").addEventListener("change", () => {
+  const checked = document.querySelectorAll("#q30List input:checked");
+  const all = document.querySelectorAll("#q30List input");
+  if (checked.length >= 3) all.forEach(c => { if (!c.checked) c.disabled = true; });
+  else all.forEach(c => c.disabled = false);
+});
+
+/* ============================================================
+   SCORING — mirrors rosc_score.py exactly
+   ============================================================ */
+const Q9_MAP = {
+  "I enjoy my work, no symptoms of burnout": 5,
+  "Occasionally under stress, no burnout": 4,
+  "Definitely burning out": 3,
+  "Burnout symptoms won't go away": 2,
+  "Completely burned out": 1,
+};
+const Q19_MAP = {
+  "1-4 patients": 5, "5-7 patients": 4, "8-10 patients": 3,
+  "11-15 patients": 2, "16+ patients": 1, "Not applicable": 3,
+};
+const Q20_MAP = { "Yes, consistently": 5, "Sometimes": 3, "Rarely": 2, "No, almost never": 1 };
+const Q21_MAP = { "Comprehensive": 5, "Partial": 3, "Minimal": 2, "None": 1 };
+const Q26_MAP = { "No": 5, "Rarely": 4, "Occasionally": 2, "Regularly": 1 };
+const Q29_MAP = {
+  "No, plan to stay": 5, "Undecided": 3, "Passively open": 2, "Actively looking": 1,
+};
+const Q32_MAP = {
+  "Yes, strongly": 5, "Yes, with caveats": 4, "No": 2, "Absolutely not": 1,
+};
+
+function safeInt(x, dflt = 3) {
+  const n = parseInt(x, 10);
+  return isNaN(n) ? dflt : n;
+}
+function to100(score1to5) {
+  return Math.round((score1to5 - 1) * 25);
+}
+function mean(arr) {
+  return arr.reduce((s, n) => s + n, 0) / arr.length;
+}
+
+function scoreResponse(d) {
+  // BI: Q9 single-item + Q10-17 + Q18 (chaos, reversed)
+  const q9 = Q9_MAP[(d.Q9 || "").trim()] || 3;
+  const q10_17 = [10,11,12,13,14,15,16,17].map(n => safeInt(d["Q" + n], 3));
+  const q18raw = safeInt(d.Q18, 3);
+  const q18 = 6 - q18raw;
+  const bi = to100(mean([q9, ...q10_17, q18]));
+
+  // EAS
+  const easItems = [
+    Q19_MAP[(d.Q19 || "").trim()] || 3,
+    Q20_MAP[(d.Q20 || "").trim()] || 3,
+    Q21_MAP[(d.Q21 || "").trim()] || 3,
+    safeInt(d.Q22, 3), safeInt(d.Q23, 3),
+    safeInt(d.Q24, 3), safeInt(d.Q25, 3),
+    Q26_MAP[(d.Q26 || "").trim()] || 3,
+  ];
+  const eas = to100(mean(easItems));
+
+  // RRI
+  const q29 = Q29_MAP[(d.Q29 || "").trim()] || 3;
+  const q31raw = safeInt(d.Q31, 5);
+  let q31 = (11 - q31raw) / 2;
+  q31 = Math.max(1, Math.min(5, q31));
+  const q32 = Q32_MAP[(d.Q32 || "").trim()] || 3;
+  const rri = to100(mean([q29, q31, q32]));
+
+  const overall = Math.round(0.40 * bi + 0.35 * eas + 0.25 * rri);
+  return { bi, eas, rri, overall };
+}
+
+function scoreBand(score) {
+  if (score >= 85) return { class: "preserved", label: "Preserved" };
+  if (score >= 70) return { class: "strain", label: "Strained" };
+  if (score >= 50) return { class: "risk", label: "At Risk" };
+  return { class: "crisis", label: "Crisis" };
+}
+
+function bandMessage(band, score) {
+  if (band.class === "preserved")
+    return "Your unit is functioning. <em>Healthy units are the rarest signal in the dataset</em> — your data matters even more here.";
+  if (band.class === "strain")
+    return "Most healthcare units score here. <em>Functional, but quietly bleeding.</em> Your data is the leverage that finally makes it visible.";
+  if (band.class === "risk")
+    return "Your unit shows measurable warning signs. <em>This is the data hospitals don't capture.</em> You're the reason it now exists.";
+  return "Your unit is in crisis. <em>You already knew that.</em> But now there's data behind it. That changes things.";
+}
+
+/* ============================================================
+   STATIC NATIONAL BENCHMARKS
+   Pulled from cited literature — used immediately, before live
+   data is meaningful. Roughly: BI 52, EAS 58, RRI 54.
+   ============================================================ */
+const STATIC_BENCHMARKS = {
+  bi: 52,
+  eas: 58,
+  rri: 54,
+  overall: Math.round(0.40 * 52 + 0.35 * 58 + 0.25 * 54),
+  source: "national average",
+  n: null
+};
+
+/* ============================================================
+   FETCH LIVE BENCHMARKS from Apps Script
+   Apps Script returns aggregated stats only when n >= threshold,
+   so privacy is preserved.
+   ============================================================ */
+async function fetchLiveBenchmarks() {
+  if (!SUBMIT_ENDPOINT) return null;
+  try {
+    const res = await fetch(SUBMIT_ENDPOINT + "?action=benchmarks", {
+      method: "GET",
+      redirect: "follow"
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.ok && data.benchmarks) return data.benchmarks;
+    return null;
+  } catch (e) {
+    console.log("Live benchmarks unavailable:", e);
+    return null;
+  }
+}
+
+/* ============================================================
+   RESULT PAGE RENDER
+   ============================================================ */
+async function renderResultPage(data) {
+  const scores = scoreResponse(data);
+  const band = scoreBand(scores.overall);
+  window._lastScores = scores;
+
+  // Hide loading
+  document.getElementById("resultLoading").style.display = "none";
+  const card = document.getElementById("resultCard");
+  card.style.display = "block";
+
+  // Score and band
+  const scoreEl = document.getElementById("resultScoreNum");
+  const bandEl = document.getElementById("resultBand");
+  scoreEl.className = "result-score " + band.class;
+  bandEl.className = "result-band " + band.class;
+  bandEl.textContent = band.label;
+
+  // Animated count-up for score
+  const target = scores.overall;
+  const duration = 1400;
+  const stepMs = 30;
+  const steps = duration / stepMs;
+  let display = 0;
+  const interval = setInterval(() => {
+    display += target / steps;
+    if (display >= target) {
+      display = target;
+      clearInterval(interval);
+    }
+    scoreEl.textContent = Math.round(display);
+  }, stepMs);
+
+  // Sub-scores
+  document.getElementById("subBI").textContent = scores.bi;
+  document.getElementById("subEAS").textContent = scores.eas;
+  document.getElementById("subRRI").textContent = scores.rri;
+
+  // Result message
+  document.getElementById("resultMsg").innerHTML = bandMessage(band);
+
+  // Comparison
+  const live = await fetchLiveBenchmarks();
+  const benchmark = live || STATIC_BENCHMARKS;
+  const compareSource = live ? `live data · n=${live.n}` : "national average · published literature";
+  renderComparison(scores, benchmark, compareSource);
+}
+
+function renderComparison(yours, benchmark, sourceLabel) {
+  const bars = document.getElementById("comparisonBars");
+  bars.innerHTML = "";
+
+  const rows = [
+    { label: "Overall", you: yours.overall, them: benchmark.overall },
+    { label: "Burnout Index", you: yours.bi, them: benchmark.bi },
+    { label: "Employer Acct.", you: yours.eas, them: benchmark.eas },
+    { label: "Retention Risk", you: yours.rri, them: benchmark.rri },
+  ];
+
+  rows.forEach(r => {
+    // your row
+    const yourRow = document.createElement("div");
+    yourRow.className = "comparison-row";
+    yourRow.innerHTML = `
+      <div class="comparison-label">${r.label}</div>
+      <div class="comparison-bar-wrap">
+        <div class="comparison-bar you"></div>
+      </div>
+      <div class="comparison-value">${r.you}</div>
+    `;
+    bars.appendChild(yourRow);
+
+    // benchmark row
+    const benchRow = document.createElement("div");
+    benchRow.className = "comparison-row";
+    benchRow.innerHTML = `
+      <div class="comparison-label" style="color:rgba(168,160,149,0.6);font-style:italic;">vs. avg</div>
+      <div class="comparison-bar-wrap">
+        <div class="comparison-bar"></div>
+      </div>
+      <div class="comparison-value" style="color:rgba(232,226,213,0.5);">${r.them}</div>
+    `;
+    bars.appendChild(benchRow);
+  });
+
+  // Animate bars in after a small delay
+  setTimeout(() => {
+    const allBars = bars.querySelectorAll(".comparison-bar");
+    allBars.forEach((bar, i) => {
+      const r = rows[Math.floor(i / 2)];
+      const isYou = i % 2 === 0;
+      bar.style.width = (isYou ? r.you : r.them) + "%";
+    });
+  }, 600);
+
+  // Source label
+  const note = document.createElement("div");
+  note.className = "comparison-note";
+  note.textContent = "— compared to " + sourceLabel + " —";
+  bars.appendChild(note);
+}
+
+/* ============================================================
+   SHARE — renders the visual card to a PNG, drops it into the
+   user's native share sheet (mobile) or downloads it (desktop).
+   ============================================================ */
+
+function populateShareCard(scores) {
+  const band = scoreBand(scores.overall);
+
+  const scoreEl = document.getElementById("scScore");
+  const bandEl = document.getElementById("scBand");
+  scoreEl.textContent = scores.overall;
+  scoreEl.className = "sc-score " + band.class;
+  bandEl.textContent = band.label;
+  bandEl.className = "sc-band " + band.class;
+
+  document.getElementById("scBI").textContent = scores.bi;
+  document.getElementById("scEAS").textContent = scores.eas;
+  document.getElementById("scRRI").textContent = scores.rri;
+}
+
+async function renderShareCardToBlob() {
+  const card = document.getElementById("shareCard");
+  // Wait one tick so any DOM updates settle
+  await new Promise(r => requestAnimationFrame(r));
+
+  const canvas = await html2canvas(card, {
+    width: 1080,
+    height: 1920,
+    scale: 1,
+    backgroundColor: "#0D0B08",
+    logging: false,
+    useCORS: true,
+    allowTaint: false,
+  });
+
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob), "image/png", 0.95);
+  });
+}
+
+async function shareScore() {
+  const s = window._lastScores;
+  if (!s) return;
+
+  const btn = document.getElementById("shareBtn");
+  const originalText = btn.textContent;
+  btn.textContent = "Generating image...";
+  btn.disabled = true;
+
+  try {
+    populateShareCard(s);
+    const blob = await renderShareCardToBlob();
+    const file = new File([blob], "rosc-score.png", { type: "image/png" });
+
+    const band = scoreBand(s.overall);
+    const shareText = `My ROSC Score: ${s.overall}/100 — ${band.label}\n\nTake yours: rosc-survey.vercel.app\n@rosc_official1`;
+
+    // Try native share with image (mobile)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "My ROSC Score",
+        text: shareText,
+      });
+    } else {
+      // Fallback: download the image
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `rosc-score-${s.overall}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+      // Also copy text to clipboard as a bonus
+      if (navigator.clipboard) {
+        try { await navigator.clipboard.writeText(shareText); } catch(e) {}
+      }
+      alert("Image saved! Post it to your Story or send it anywhere.");
+    }
+  } catch (e) {
+    console.error("Share failed:", e);
+    if (e.name !== "AbortError") {  // user cancelled — silent
+      alert("Share didn't work — try the download option instead.");
+    }
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+/* ---------- Q4 Other-reveal ---------- */
+const Q4select = document.getElementById("Q4select");
+const Q4other = document.getElementById("Q4other");
+Q4select.addEventListener("change", () => {
+  if (Q4select.value === "__OTHER__") {
+    Q4other.style.display = "block";
+    Q4other.required = true;
+    Q4other.focus();
+  } else {
+    Q4other.style.display = "none";
+    Q4other.required = false;
+    Q4other.value = "";
+  }
+});
+
+/* ---------- Q1, Q2, Q3, Q28 Other-reveal ----------
+   When the user picks "Other" on any of these questions,
+   reveal a text box. The typed value replaces "Other" in
+   the submitted data so we get clean responses, not "Other".
+*/
+const OTHER_REVEAL_QS = ["Q1", "Q2", "Q3", "Q28"];
+
+OTHER_REVEAL_QS.forEach(qid => {
+  const inputs = document.querySelectorAll(`input[name="${qid}"]`);
+  const otherBox = document.getElementById(`${qid}other`);
+  if (!otherBox) return;
+
+  inputs.forEach(input => {
+    input.addEventListener("change", () => {
+      const isCheckbox = input.type === "checkbox";
+      let otherIsActive;
+
+      if (isCheckbox) {
+        // for Q28 (checkbox): show if "Other" is checked
+        const otherCheckbox = document.querySelector(`input[name="${qid}"][value="Other"]`);
+        otherIsActive = otherCheckbox && otherCheckbox.checked;
+      } else {
+        // for radios: show only if "Other" is the selected one
+        otherIsActive = input.value === "Other" && input.checked;
+      }
+
+      if (otherIsActive) {
+        otherBox.style.display = "block";
+        otherBox.focus();
+      } else if (!isCheckbox) {
+        // radio: hide whenever any non-Other option is picked
+        otherBox.style.display = "none";
+        otherBox.value = "";
+      } else {
+        // checkbox: only hide if Other is now unchecked
+        const otherCheckbox = document.querySelector(`input[name="${qid}"][value="Other"]`);
+        if (!otherCheckbox.checked) {
+          otherBox.style.display = "none";
+          otherBox.value = "";
+        }
+      }
+    });
+  });
+});
+
+/* ---------- Page navigation ---------- */
+const backBtn = document.getElementById("backBtn");
+const nextBtn = document.getElementById("nextBtn");
+const navRow = document.getElementById("navRow");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+const ROMAN = ["", "I", "II", "III", "IV", "V"];
+
+function showPage(n) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelector(`.page[data-page="${n}"]`).classList.add("active");
+  if (n <= TOTAL_PAGES) {
+    progressFill.style.width = (n / TOTAL_PAGES * 100) + "%";
+    progressLabel.textContent = `Section ${ROMAN[n]} of V`;
+  }
+  backBtn.disabled = n === 1;
+  if (n === TOTAL_PAGES) nextBtn.textContent = "Submit ✓";
+  else if (n < TOTAL_PAGES) nextBtn.textContent = "Continue →";
+  if (n > TOTAL_PAGES) navRow.style.display = "none";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function validatePage(n) {
+  const page = document.querySelector(`.page[data-page="${n}"]`);
+  // Special case: Q4 "Other" requires the text input
+  if (n === 1 && Q4select.value === "__OTHER__" && !Q4other.value.trim()) {
+    alert("Please type your hospital or system name.");
+    Q4other.focus();
+    return false;
+  }
+  // Q1/Q2/Q3 "Other" requires text
+  if (n === 1) {
+    for (const qid of ["Q1", "Q2", "Q3"]) {
+      const otherRadio = page.querySelector(`input[name="${qid}"][value="Other"]`);
+      if (otherRadio && otherRadio.checked) {
+        const txt = document.getElementById(`${qid}other`);
+        if (!txt.value.trim()) {
+          alert(`Please specify your "${qid}" response in the text box.`);
+          txt.focus();
+          return false;
+        }
+      }
+    }
+  }
+  const required = page.querySelectorAll("input[required], textarea[required], select[required]");
+  for (const el of required) {
+    if (el.type === "radio") {
+      const name = el.name;
+      if (!page.querySelector(`input[name="${name}"]:checked`)) {
+        alert(`Please answer ${name} before continuing.`);
+        return false;
+      }
+    } else if (el.type === "hidden") {
+      if (!el.value) {
+        alert(`Please answer ${el.name} before continuing.`);
+        return false;
+      }
+    } else if (el.tagName === "SELECT") {
+      if (!el.value) {
+        alert(`Please answer ${el.name} before continuing.`);
+        el.focus();
+        return false;
+      }
+    } else {
+      if (!el.value.trim()) {
+        alert(`Please answer ${el.name} before continuing.`);
+        el.focus();
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function collectData() {
+  const data = { _form: FORM_NAME, _submitted: new Date().toISOString() };
+  document.querySelectorAll("#roscForm input, #roscForm textarea").forEach(el => {
+    if (!el.name) return;
+    if (el.type === "radio") {
+      if (el.checked) data[el.name] = el.value;
+    } else if (el.type === "checkbox") {
+      if (el.checked) {
+        if (Array.isArray(data[el.name])) data[el.name].push(el.value);
+        else if (data[el.name]) data[el.name] = [data[el.name], el.value];
+        else data[el.name] = [el.value];
+      }
+    } else {
+      if (el.value) data[el.name] = el.value;
+    }
+  });
+  // flatten checkbox arrays for CSV-friendliness
+  Object.keys(data).forEach(k => {
+    if (Array.isArray(data[k])) data[k] = data[k].join("; ");
+  });
+  // Q4 "Other" handling: replace sentinel value with the typed name
+  if (data.Q4 === "__OTHER__") {
+    const typed = document.getElementById("Q4other").value.trim();
+    data.Q4 = typed || "Other (unspecified)";
+  }
+  // Q1/Q2/Q3 "Other" handling: if user picked Other, replace with typed value
+  ["Q1", "Q2", "Q3"].forEach(qid => {
+    if (data[qid] === "Other") {
+      const typed = document.getElementById(`${qid}other`).value.trim();
+      if (typed) data[qid] = `Other: ${typed}`;
+    }
+  });
+  // Q28 (checkbox) "Other" handling: if "Other" is in the list, append typed text
+  if (data.Q28 && data.Q28.includes("Other")) {
+    const typed = document.getElementById("Q28other").value.trim();
+    if (typed) {
+      data.Q28 = data.Q28.replace("Other", `Other: ${typed}`);
+    }
+  }
+  return data;
+}
+
+async function submitForm() {
+  const data = collectData();
+  window._lastSubmission = data;
+
+  // Mark this device as having submitted (soft dedup)
+  try {
+    localStorage.setItem("rosc_submitted_at", new Date().toISOString());
+  } catch (e) { /* private browsing — ignore */ }
+
+  // Move to result page immediately, show loading
+  showPage(6);
+
+  if (SUBMIT_ENDPOINT) {
+    try {
+      const res = await fetch(SUBMIT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(data),
+        redirect: "follow"
+      });
+      if (!res.ok) console.warn("Submit warning:", res.status);
+    } catch (e) {
+      console.error(e);
+    }
+  } else {
+    console.log("ROSC submission (no endpoint):", data);
+  }
+
+  // Render result regardless of submission success — user still gets feedback
+  renderResultPage(data);
+}
+
+nextBtn.addEventListener("click", () => {
+  if (!validatePage(currentPage)) return;
+  if (currentPage === TOTAL_PAGES) {
+    submitForm();
+  } else {
+    currentPage++;
+    showPage(currentPage);
+  }
+});
+
+backBtn.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    showPage(currentPage);
+  }
+});
+
+/* ---------- Download JSON ---------- */
+document.getElementById("downloadBtn").addEventListener("click", () => {
+  const data = window._lastSubmission || collectData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `rosc_response_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* ---------- Share button ---------- */
+document.getElementById("shareBtn").addEventListener("click", shareScore);
+
+/* ---------- Soft dedup: show banner if device has submitted before ---------- */
+(function initAlreadyBanner() {
+  try {
+    const submittedAt = localStorage.getItem("rosc_submitted_at");
+    if (submittedAt) {
+      const banner = document.getElementById("alreadyBanner");
+      if (banner) banner.style.display = "block";
+    }
+  } catch (e) { /* ignore */ }
+
+  const dismiss = document.getElementById("dismissAlready");
+  if (dismiss) {
+    dismiss.addEventListener("click", () => {
+      const banner = document.getElementById("alreadyBanner");
+      if (banner) banner.style.display = "none";
+    });
+  }
+})();
+</script>
+</body>
+</html>
