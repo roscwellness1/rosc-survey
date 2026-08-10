@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0D0B08">
+<title>ROSC · Leadership Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0D0B08; --gold: #B8922A; --gold-dark: #8C6E1F;
+  --cream: #E8E2D5; --paper: #FAF7F1; --ink: #2A2722;
+  --muted: #7A7268; --rule: #D9D2C2; --white: #FFFFFF;
+  --green: #2E7D32; --yellow: #B8922A; --orange: #C2691F; --red: #9B2C2C;
+  --display: 'Cormorant Garamond', Georgia, serif;
+  --body: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+body { min-height: 100vh; }
+
+/* ===== Auth Gate ===== */
+.auth-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  background: var(--black);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  padding: 24px;
+}
+.auth-card {
+  background: var(--black); color: var(--cream); max-width: 420px; width: 100%;
+}
+.auth-card .gold-mark { width: 28px; height: 2px; background: var(--gold); margin-bottom: 14px; }
+.auth-card .lbl { font-size: 10px; font-weight: 600; letter-spacing: 2.5px; color: var(--gold); margin-bottom: 18px; }
+.auth-card h1 { font-family: var(--display); font-weight: 400; font-size: 42px; color: var(--cream); margin-bottom: 8px; line-height: 1; }
+.auth-card .sub { font-family: var(--display); font-style: italic; color: var(--gold); font-size: 18px; margin-bottom: 28px; }
+.auth-card input {
+  width: 100%; padding: 16px; font-family: var(--mono); font-size: 16px;
+  background: transparent; color: var(--cream); border: 1px solid #3A332B;
+  border-radius: 0; outline: none;
+}
+.auth-card input:focus { border-color: var(--gold); }
+.auth-card .err { color: #FF8B85; font-size: 13px; margin-top: 8px; min-height: 18px; }
+.auth-card button {
+  width: 100%; margin-top: 14px; padding: 14px; background: var(--gold); color: var(--black);
+  font-family: var(--body); font-weight: 600; font-size: 14px; letter-spacing: 0.5px;
+  border: none; cursor: pointer;
+}
+.auth-card button:hover { background: var(--gold-dark); color: var(--cream); }
+.auth-card .note { color: #9E968A; font-size: 11px; margin-top: 22px; line-height: 1.5; }
+
+/* ===== Top bar ===== */
+.topbar { background: var(--black); color: var(--cream); padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.topbar .brand { display: flex; align-items: center; gap: 14px; }
+.topbar .gold-mark { width: 22px; height: 2px; background: var(--gold); }
+.topbar .title { font-family: var(--display); font-size: 22px; color: var(--cream); }
+.topbar .eye { font-size: 9px; letter-spacing: 2.5px; color: var(--gold); font-weight: 600; }
+.topbar .meta { font-family: var(--mono); font-size: 11px; color: #9E968A; text-align: right; }
+.topbar .meta .h { color: var(--gold); }
+.topbar button.refresh { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 8px 14px; font-family: var(--body); font-size: 11px; font-weight: 600; letter-spacing: 1px; cursor: pointer; }
+.topbar button.refresh:hover { background: var(--gold); color: var(--black); }
+
+/* ===== Layout ===== */
+.dash { padding: 28px; max-width: 1400px; margin: 0 auto; }
+.section { margin-bottom: 36px; }
+.section-h { font-family: var(--display); font-weight: 400; font-size: 24px; color: var(--ink); margin-bottom: 4px; }
+.section-eye { font-size: 10px; letter-spacing: 2px; color: var(--gold); font-weight: 600; margin-bottom: 14px; }
+
+.grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+@media (max-width: 720px) { .dash { padding: 18px; } .grid-units { grid-template-columns: 1fr; } }
+
+/* ===== Unit Card ===== */
+.unit-card {
+  background: var(--white); border: 1px solid var(--rule); position: relative;
+  padding: 20px 22px; cursor: pointer; transition: border-color 150ms ease;
+}
+.unit-card:hover { border-color: var(--gold); }
+.unit-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--muted); }
+.unit-card.GREEN::before { background: var(--green); }
+.unit-card.YELLOW::before { background: var(--yellow); }
+.unit-card.RED::before { background: var(--red); }
+.unit-card.NONE::before { background: var(--muted); }
+
+.unit-name { font-family: var(--display); font-size: 22px; color: var(--ink); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; }
+.unit-name .confidence { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--muted); }
+
+.score-row { display: flex; align-items: baseline; gap: 18px; margin-bottom: 16px; }
+.score-big { font-family: var(--display); font-size: 56px; line-height: 1; }
+.score-big.GREEN { color: var(--green); }
+.score-big.YELLOW { color: var(--yellow); }
+.score-big.RED { color: var(--red); }
+.score-big.NONE { color: var(--muted); font-size: 32px; }
+.trend { font-family: var(--mono); font-size: 14px; }
+.trend.up { color: var(--green); }
+.trend.down { color: var(--red); }
+.trend.stable { color: var(--muted); }
+.trend.none { color: var(--muted); }
+
+.respondents { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.respondents .v { color: var(--ink); }
+
+.sparkline-wrap { margin: 14px -22px -8px; padding: 0 22px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.sparkline-wrap .lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px; }
+.sparkline { display: block; width: 100%; height: 32px; }
+
+.expand-toggle { font-size: 11px; color: var(--gold); margin-top: 10px; letter-spacing: 0.5px; }
+.role-breakdown { display: none; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.unit-card.expanded .role-breakdown { display: block; }
+.role-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+.role-row .name { color: var(--ink); font-weight: 500; }
+.role-row .meta { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+.role-row .score { font-family: var(--mono); font-weight: 600; }
+.role-row.suppressed .score { color: var(--muted); font-style: italic; font-weight: 400; }
+.role-row.GREEN .score { color: var(--green); }
+.role-row.YELLOW .score { color: var(--yellow); }
+.role-row.RED .score { color: var(--red); }
+
+/* ===== Alerts ===== */
+.alert-panel { background: var(--black); color: var(--cream); padding: 22px; }
+.alert-panel h3 { font-family: var(--display); font-size: 20px; color: var(--cream); margin-bottom: 4px; font-weight: 400; }
+.alert-panel .eye { font-size: 10px; letter-spacing: 2px; color: var(--gold); font-weight: 600; margin-bottom: 14px; }
+.alert-empty { color: #9E968A; font-style: italic; font-size: 13px; padding: 10px 0; }
+.alert-item { padding: 12px 0; border-bottom: 1px solid #3A332B; display: grid; grid-template-columns: 1fr auto; gap: 16px; }
+.alert-item:last-child { border-bottom: none; }
+.alert-item .unit { color: var(--cream); font-weight: 600; font-size: 14px; }
+.alert-item .meta { color: #9E968A; font-size: 11px; font-family: var(--mono); margin-top: 2px; }
+.alert-item .score { font-family: var(--display); font-size: 24px; }
+.alert-item.thresholdbreach .score { color: var(--red); }
+.alert-item.scoredrop .score { color: var(--orange); }
+
+/* ===== Participation strip ===== */
+.part-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.part-stat { background: var(--white); border: 1px solid var(--rule); padding: 16px 18px; position: relative; }
+.part-stat::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gold); }
+.part-stat .n { font-family: var(--display); font-size: 32px; color: var(--gold); line-height: 1; }
+.part-stat .l { font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-top: 6px; }
+
+.loading { text-align: center; padding: 60px 20px; color: var(--muted); font-style: italic; }
+.empty { background: var(--white); border: 1px dashed var(--rule); padding: 40px 20px; text-align: center; color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- ===== Auth Gate ===== -->
+<div class="auth-overlay" id="auth-gate">
+  <div class="auth-card">
+    <div class="gold-mark"></div>
+    <div class="lbl">ROSC · WORKFORCE INTELLIGENCE</div>
+    <h1>Leadership dashboard</h1>
+    <div class="sub">Enter your access code</div>
+    <input type="password" id="auth-input" placeholder="Access code" autocomplete="off">
+    <div class="err" id="auth-err"></div>
+    <button onclick="submitAuth()">Continue</button>
+    <div class="note">Access codes are shared by hospital. The dashboard shows only aggregate, anonymous data — never individual responses. No clinician's identity is recoverable from these scores.</div>
+  </div>
+</div>
+
+<!-- ===== Main dashboard ===== -->
+<div id="main" style="display: none;">
+  <div class="topbar">
+    <div class="brand">
+      <span class="gold-mark"></span>
+      <div>
+        <div class="eye">ROSC · WORKFORCE INTELLIGENCE</div>
+        <div class="title" id="hospital-name">—</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div class="meta">
+        <div class="h" id="today">—</div>
+        <div>Last refreshed <span id="last-refresh">—</span></div>
+      </div>
+      <button class="refresh" onclick="refresh()">REFRESH</button>
+    </div>
+  </div>
+
+  <div class="dash">
+    <!-- Units -->
+    <div class="section">
+      <div class="section-eye">UNIT SCORECARDS  ·  PERSON-WEIGHTED PULSE  ·  PAST 30 DAYS</div>
+      <div class="section-h">Where the workforce is right now</div>
+      <div id="units-grid" class="grid-units"><div class="loading">Loading unit scores…</div></div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="section">
+      <div class="section-eye">ACTIVE ALERTS</div>
+      <div class="section-h">What needs attention</div>
+      <div class="alert-panel">
+        <div class="eye">UNRESOLVED</div>
+        <h3>Threshold breaches and significant declines</h3>
+        <div id="alerts-list"><div class="alert-empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Participation -->
+    <div class="section">
+      <div class="section-eye">PARTICIPATION  ·  PAST 30 DAYS</div>
+      <div class="section-h">How representative the data is</div>
+      <div id="part-strip" class="part-strip"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// =============== CONFIG ===============
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwddWB5TTHi4oo5YTv9GBInIwkxhR09W58PMj1GwjLlSm86oP-ifLo7YRSfk4T7iF_T/exec';
+const API_KEY     = 'k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';
+const REFRESH_MS  = 5 * 60 * 1000; // 5 minutes
+// =====================================
+
+let authCode = localStorage.getItem('rosc_auth') || null;
+let hospitalName = '';
+
+async function api(endpoint, method, body, extraParams) {
+  const p = { endpoint, key: API_KEY };
+  if (authCode) p.auth = authCode;
+  if (extraParams) Object.assign(p, extraParams);
+  const url = `${BACKEND_URL}?${new URLSearchParams(p)}`;
+  const opts = { method };
+  if (method === 'POST') {
+    opts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+    opts.body = JSON.stringify(body || {});
+  }
+  const res = await fetch(url, opts);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// ===== Auth =====
+async function submitAuth() {
+  const code = document.getElementById('auth-input').value.trim();
+  const errEl = document.getElementById('auth-err');
+  errEl.textContent = '';
+  if (!code) { errEl.textContent = 'Enter your access code.'; return; }
+  authCode = code;
+  try {
+    const data = await api('auth', 'GET');
+    localStorage.setItem('rosc_auth', code);
+    hospitalName = data.hospitalname || 'Dashboard';
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    boot();
+  } catch (e) {
+    authCode = null;
+    errEl.textContent = e.message || 'Invalid code.';
+  }
+}
+
+document.getElementById('auth-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
+
+// Auto-submit if cached
+if (authCode) {
+  api('auth', 'GET').then(data => {
+    hospitalName = data.hospitalname || 'Dashboard';
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    boot();
+  }).catch(() => {
+    localStorage.removeItem('rosc_auth');
+    authCode = null;
+  });
+}
+
+// ===== Helpers =====
+function bandClass(c) { return c || 'NONE'; }
+function trendLabel(t) {
+  if (t == null) return { cls: 'none', txt: '—' };
+  if (t > 0.5) return { cls: 'up', txt: `↑ ${t.toFixed(1)}` };
+  if (t < -0.5) return { cls: 'down', txt: `↓ ${Math.abs(t).toFixed(1)}` };
+  return { cls: 'stable', txt: '→ stable' };
+}
+
+function sparklineSvg(scores, w = 280, h = 32) {
+  const valid = scores.filter(v => v != null);
+  if (valid.length < 2) return '';
+  const min = Math.min(...valid, 50), max = Math.max(...valid, 80);
+  const span = Math.max(max - min, 1);
+  const pad = 2;
+  const points = scores.map((v, i) => {
+    if (v == null) return null;
+    const x = pad + (i / (scores.length - 1)) * (w - pad * 2);
+    const y = h - pad - ((v - min) / span) * (h - pad * 2);
+    return `${x},${y}`;
+  });
+  // Build polyline only from contiguous non-null points
+  let segments = [];
+  let cur = [];
+  points.forEach(p => {
+    if (p) cur.push(p);
+    else if (cur.length) { segments.push(cur); cur = []; }
+  });
+  if (cur.length) segments.push(cur);
+
+  const polyEls = segments.map(seg =>
+    `<polyline points="${seg.join(' ')}" fill="none" stroke="#B8922A" stroke-width="1.5" />`
+  ).join('');
+  const lastIdx = points.map((p, i) => p ? i : -1).filter(i => i >= 0).pop();
+  const lastPoint = lastIdx != null ? points[lastIdx].split(',') : null;
+  const dot = lastPoint ? `<circle cx="${lastPoint[0]}" cy="${lastPoint[1]}" r="2.5" fill="#B8922A" />` : '';
+  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${polyEls}${dot}</svg>`;
+}
+
+function renderUnitCard(u) {
+  const band = bandClass(u.colorcode);
+  const trend = trendLabel(u.trend);
+  const score = u.personweightedpulsescore != null ? u.personweightedpulsescore : '—';
+  const elig = u.eligible_total > 0 ? u.eligible_total : '?';
+  const partRate = u.eligible_total > 0 ? Math.round((u.uniquerespondents / u.eligible_total) * 100) : null;
+  const roleHtml = Object.entries(u.rolebreakdown || {}).map(([role, info]) => {
+    if (info.suppressed) {
+      return `<div class="role-row suppressed"><span class="name">${role}</span><span class="score">Suppressed (n &lt; 5)</span></div>`;
+    }
+    const rb = bandClass(info.score >= 75 ? 'GREEN' : info.score >= 55 ? 'YELLOW' : 'RED');
+    return `<div class="role-row ${rb}"><span class="name">${role} <span class="meta">n = ${info.n}</span></span><span class="score">${info.score}</span></div>`;
+  }).join('');
+  const roleCount = Object.keys(u.rolebreakdown || {}).length;
+  return `
+    <div class="unit-card ${band}" onclick="this.classList.toggle('expanded')">
+      <div class="unit-name"><span>${u.unitname}</span><span class="confidence">${u.confidencelevel.toUpperCase()}</span></div>
+      <div class="score-row">
+        <div class="score-big ${band}">${score}</div>
+        <div class="trend ${trend.cls}">${trend.txt}</div>
+      </div>
+      <div class="respondents"><span class="v">${u.uniquerespondents}</span> / ${elig} unique clinicians ${partRate != null ? `· <span class="v">${partRate}%</span>` : ''}</div>
+      <div class="sparkline-wrap">
+        <div class="lbl">12-WEEK TREND</div>
+        ${u.sparkline ? sparklineSvg(u.sparkline) : '<div style="height: 32px; display:flex; align-items:center; color: var(--muted); font-size: 11px; font-style: italic;">Insufficient history</div>'}
+      </div>
+      ${roleCount > 0 ? `<div class="expand-toggle">▼ Tap for role breakdown</div>` : ''}
+      <div class="role-breakdown">${roleHtml || '<div style="color: var(--muted); font-style: italic; font-size: 12px;">No role data yet.</div>'}</div>
+    </div>
+  `;
+}
+
+function renderAlerts(alerts) {
+  if (!alerts || !alerts.length) {
+    return '<div class="alert-empty">No active alerts. All monitored units above threshold.</div>';
+  }
+  return alerts.map(a => {
+    const cls = a.alerttype;
+    const when = a.triggereddate ? new Date(a.triggereddate).toLocaleDateString() : '—';
+    const label = a.alerttype === 'thresholdbreach' ? 'Below threshold' : 'Significant decline';
+    const delta = a.delta != null ? `Δ ${a.delta > 0 ? '+' : ''}${a.delta}` : '';
+    return `<div class="alert-item ${cls}">
+      <div>
+        <div class="unit">${a.unit}</div>
+        <div class="meta">${label.toUpperCase()} · TRIGGERED ${when} · ${delta}</div>
+      </div>
+      <div class="score">${a.currentscore != null ? a.currentscore : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderParticipation(units) {
+  const totalUnique = units.reduce((s, u) => s + (u.uniquerespondents || 0), 0);
+  const totalElig = units.reduce((s, u) => s + (u.eligible_total || 0), 0);
+  const totalResp = units.reduce((s, u) => s + (u.totalresponses || 0), 0);
+  const avgPerPerson = totalUnique > 0 ? (totalResp / totalUnique).toFixed(1) : '—';
+  const partRate = totalElig > 0 ? Math.round((totalUnique / totalElig) * 100) + '%' : '—';
+  return [
+    { n: totalUnique, l: 'UNIQUE CLINICIANS' },
+    { n: totalResp,   l: 'TOTAL CHECK-INS' },
+    { n: avgPerPerson, l: 'AVG / CLINICIAN' },
+    { n: partRate,    l: 'PARTICIPATION RATE' },
+  ].map(s => `<div class="part-stat"><div class="n">${s.n}</div><div class="l">${s.l}</div></div>`).join('');
+}
+
+// ===== Boot + Refresh =====
+let lastRefresh = null;
+async function boot() {
+  document.getElementById('hospital-name').textContent = hospitalName;
+  document.getElementById('today').textContent = new Date().toLocaleDateString();
+  await refresh();
+  setInterval(refresh, REFRESH_MS);
+}
+
+async function refresh() {
+  try {
+    const [dash, alerts] = await Promise.all([
+      api('dashboard', 'GET'),
+      api('alerts', 'GET'),
+    ]);
+    document.getElementById('units-grid').innerHTML =
+      dash.units.length ? dash.units.map(renderUnitCard).join('') :
+      '<div class="empty">No units configured yet. Add units to the Config sheet.</div>';
+    document.getElementById('alerts-list').innerHTML = renderAlerts(alerts.alerts);
+    document.getElementById('part-strip').innerHTML = renderParticipation(dash.units);
+    lastRefresh = new Date();
+    document.getElementById('last-refresh').textContent = lastRefresh.toLocaleTimeString();
+  } catch (e) {
+    document.getElementById('units-grid').innerHTML = `<div class="empty">Could not load dashboard: ${e.message}</div>`;
+  }
+}
+</script>
+</body>
+</html>
