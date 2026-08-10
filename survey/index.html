@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D0B08">
+<title>ROSC · Comprehensive Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0D0B08; --gold: #B8922A; --gold-dark: #8C6E1F;
+  --cream: #E8E2D5; --paper: #FAF7F1; --ink: #2A2722;
+  --muted: #7A7268; --rule: #D9D2C2; --white: #FFFFFF;
+  --display: 'Cormorant Garamond', Georgia, serif;
+  --body: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+body { min-height: 100vh; min-height: 100dvh; }
+
+.brand-bar { background: var(--black); color: var(--cream); padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+.brand-bar .gold-mark { width: 18px; height: 2px; background: var(--gold); }
+.brand-bar .lbl { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--gold); }
+
+.progress { position: sticky; top: 0; background: var(--paper); border-bottom: 1px solid var(--rule); padding: 12px 20px; z-index: 10; }
+.progress .row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+.progress .row .label { color: var(--ink); font-weight: 600; }
+.progress .bar { height: 3px; background: var(--rule); position: relative; overflow: hidden; }
+.progress .fill { height: 100%; background: var(--gold); width: 0%; transition: width 280ms ease; }
+
+.app { padding: 22px 22px 100px; max-width: 640px; margin: 0 auto; width: 100%; }
+.eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--gold); margin-bottom: 10px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.15; color: var(--ink); margin-bottom: 12px; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.25; color: var(--ink); margin-bottom: 16px; }
+.domain-h { font-family: var(--display); font-weight: 500; font-size: 22px; color: var(--ink); margin: 28px 0 6px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.domain-h:first-of-type { border-top: none; padding-top: 4px; }
+.domain-sub { font-size: 11px; letter-spacing: 1.5px; color: var(--gold); font-weight: 600; margin-bottom: 14px; }
+p.lede { color: var(--ink); font-size: 15px; margin-bottom: 18px; }
+p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+
+.screen { display: none; animation: fadeIn 240ms ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 6px; letter-spacing: 0.4px; }
+.field .hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-style: italic; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 14px 14px; font-family: var(--body); font-size: 16px; color: var(--ink);
+  background: var(--white); border: 1px solid var(--rule); border-radius: 0;
+  -webkit-appearance: none; appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); border-width: 2px; padding: 13px 13px; }
+.field textarea { resize: vertical; min-height: 120px; }
+.field .count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; font-family: var(--mono); }
+.field.error input, .field.error select, .field.error textarea { border-color: #9B2C2C; }
+.field .err-msg { color: #9B2C2C; font-size: 12px; margin-top: 4px; }
+
+.likert { margin-bottom: 22px; padding-bottom: 4px; }
+.likert .q { font-size: 15px; color: var(--ink); margin-bottom: 12px; line-height: 1.4; }
+.likert .q .num { font-family: var(--mono); color: var(--gold); font-size: 13px; margin-right: 6px; font-weight: 500; }
+.likert .endpoints { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-style: italic; }
+.likert .scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.likert .scale button {
+  background: var(--white); border: 1.5px solid var(--rule); color: var(--ink);
+  padding: 14px 0; font-family: var(--mono); font-size: 16px; font-weight: 500;
+  cursor: pointer; transition: all 120ms ease; min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+.likert .scale button:hover { border-color: var(--gold); }
+.likert .scale button.selected { background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 600; }
+
+.btn { display: block; width: 100%; padding: 16px 20px; font-family: var(--body); font-size: 15px; font-weight: 600;
+  background: var(--gold); color: var(--black); border: none; cursor: pointer; letter-spacing: 0.5px;
+  transition: background 150ms ease; -webkit-tap-highlight-color: transparent; }
+.btn:hover { background: var(--gold-dark); color: var(--cream); }
+.btn:disabled { background: var(--rule); color: var(--muted); cursor: not-allowed; }
+.btn.secondary { background: transparent; color: var(--gold-dark); border: 1.5px solid var(--gold); }
+.btn.secondary:hover { background: var(--gold); color: var(--black); }
+.btn + .btn { margin-top: 10px; }
+.actions { margin-top: 28px; }
+
+.anon-note { background: var(--black); color: var(--cream); padding: 16px; font-size: 13px; margin: 16px 0 24px; border-left: 3px solid var(--gold); }
+.anon-note strong { color: var(--gold); font-weight: 600; letter-spacing: 0.3px; }
+
+.pulse-anchor { background: var(--white); border: 1px solid var(--rule); padding: 20px; margin: 20px 0; position: relative; }
+.pulse-anchor::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gold); }
+.pulse-anchor .lbl { font-size: 10px; letter-spacing: 2px; color: var(--gold); font-weight: 600; margin-bottom: 10px; }
+.pulse-anchor .row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed var(--rule); }
+.pulse-anchor .row:last-child { border-bottom: none; }
+.pulse-anchor .row .k { color: var(--ink); font-size: 14px; }
+.pulse-anchor .row .v { font-family: var(--display); font-size: 24px; color: var(--gold); }
+.pulse-anchor .row .v.small { font-size: 18px; }
+.pulse-anchor .trend { display: inline-block; font-family: var(--mono); }
+.pulse-anchor .trend.up { color: var(--gold); }
+.pulse-anchor .trend.down { color: #9B2C2C; }
+.pulse-anchor .trend.stable { color: var(--muted); }
+
+.success-tick { width: 56px; height: 56px; border-radius: 50%; background: var(--gold); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.success-tick svg { width: 28px; height: 28px; stroke: var(--black); stroke-width: 3; fill: none; }
+
+.foot { background: var(--black); color: var(--cream); padding: 10px 20px; font-size: 11px; text-align: center; letter-spacing: 1px; margin-top: 40px; }
+.foot .gold { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="brand-bar">
+  <span class="gold-mark"></span>
+  <span class="lbl">ROSC · WORKFORCE INTELLIGENCE</span>
+</div>
+
+<div class="progress" id="prog" style="display: none;">
+  <div class="row"><span class="label" id="prog-label">SECTION</span><span id="prog-count">0 of 17</span></div>
+  <div class="bar"><div class="fill" id="prog-fill"></div></div>
+</div>
+
+<main class="app">
+
+  <!-- ===== Welcome ===== -->
+  <section class="screen active" id="screen-welcome">
+    <div class="eyebrow">COMPREHENSIVE SURVEY  ·  5–8 MINUTES</div>
+    <h1>The longer view of your work.</h1>
+    <div class="anon-note">
+      <strong>This is anonymous.</strong> Your answers are linked anonymously to your previous pulse check-ins so we can see how the shorter-term picture connects to the longer one — but your hospital only sees aggregate, unit-level scores.
+    </div>
+    <p class="muted">This survey covers burnout, work environment, culture, and retention. It is offered at baseline and again at a fixed endpoint to measure change over time.</p>
+    <div class="actions">
+      <button class="btn" onclick="show('screen-salc')">Begin</button>
+    </div>
+  </section>
+
+  <!-- ===== SALC ===== -->
+  <section class="screen" id="screen-salc">
+    <div class="eyebrow">ANONYMOUS ID  ·  STEP 1 OF 4</div>
+    <h2>Five quick questions to link this survey to your pulse history.</h2>
+    <p class="muted">Same five questions as your pulse check-ins. The answers are never stored — only their cryptographic hash.</p>
+
+    <div class="field" id="f-a1"><label>1. First two letters of your mother's first name</label><div class="hint">Letters only</div><input type="text" id="a1" maxlength="2" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+    <div class="field" id="f-a2"><label>2. Last two digits of your personal cell phone</label><div class="hint">Numbers only</div><input type="text" id="a2" inputmode="numeric" maxlength="2" autocomplete="off"></div>
+    <div class="field" id="f-a3"><label>3. Number of siblings (including half / step)</label><div class="hint">Enter "0" if none</div><input type="text" id="a3" inputmode="numeric" maxlength="2" autocomplete="off"></div>
+    <div class="field" id="f-a4"><label>4. Last two letters of your city of birth</label><div class="hint">Letters only</div><input type="text" id="a4" maxlength="2" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+    <div class="field" id="f-a5"><label>5. First letter of the street where you grew up</label><div class="hint">One letter</div><input type="text" id="a5" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+
+    <div class="actions">
+      <button class="btn" id="btn-salc-continue" onclick="submitSALC()">Continue</button>
+      <button class="btn secondary" onclick="show('screen-welcome')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Demographics ===== -->
+  <section class="screen" id="screen-demographics">
+    <div class="eyebrow">YOUR ROLE  ·  STEP 2 OF 4</div>
+    <h2>Tell us which unit and role you work in.</h2>
+    <div class="field" id="f-unit"><label>Unit</label><select id="unit"><option value="">— Select —</option></select></div>
+    <div class="field" id="f-role"><label>Role</label><select id="role"><option value="">— Select —</option><option>RN</option><option>Tech</option><option>MA</option><option>Ancillary</option><option>APP</option><option>MD</option></select></div>
+    <div class="field" id="f-shift"><label>Shift</label><select id="shift"><option value="">— Select —</option><option>Day</option><option>Night</option><option>Rotating</option></select></div>
+    <div class="actions">
+      <button class="btn" onclick="submitDemographics()">Continue to questions</button>
+      <button class="btn secondary" onclick="show('screen-salc')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Likert Questions ===== -->
+  <section class="screen" id="screen-likert">
+    <div class="eyebrow">QUESTIONS  ·  STEP 3 OF 4</div>
+    <h2>15 questions across four domains.</h2>
+
+    <div class="domain-h">Burnout</div>
+    <div class="domain-sub">EXHAUSTION  ·  DETACHMENT  ·  COGNITIVE LOAD</div>
+    <div class="likert" data-q="1">
+      <div class="q"><span class="num">Q1</span>Using your own definition of burnout, how would you rate your level of burnout?</div>
+      <div class="endpoints"><span>No burnout</span><span>Completely burned out</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="2">
+      <div class="q"><span class="num">Q2</span>I feel exhausted at the thought of another day at work.</div>
+      <div class="endpoints"><span>Strongly disagree</span><span>Strongly agree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="3">
+      <div class="q"><span class="num">Q3</span>I feel mentally detached from my work.</div>
+      <div class="endpoints"><span>Strongly disagree</span><span>Strongly agree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="4">
+      <div class="q"><span class="num">Q4</span>I struggle to concentrate at work.</div>
+      <div class="endpoints"><span>Strongly disagree</span><span>Strongly agree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="5">
+      <div class="q"><span class="num">Q5</span>I feel unable to control my emotions at work.</div>
+      <div class="endpoints"><span>Strongly disagree</span><span>Strongly agree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+
+    <div class="domain-h">Work environment</div>
+    <div class="domain-sub">WORKLOAD  ·  STAFFING  ·  AUTONOMY  ·  VALUES ALIGNMENT</div>
+    <div class="likert" data-q="6">
+      <div class="q"><span class="num">Q6</span>My workload is manageable.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="7">
+      <div class="q"><span class="num">Q7</span>Staffing on my unit is adequate for safe patient care.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="8">
+      <div class="q"><span class="num">Q8</span>I have enough control over my work schedule and workflow.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="9">
+      <div class="q"><span class="num">Q9</span>My values align with the values of my department leadership.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+
+    <div class="domain-h">Culture</div>
+    <div class="domain-sub">TRUST  ·  TEAM COHESION  ·  BELONGING</div>
+    <div class="likert" data-q="10">
+      <div class="q"><span class="num">Q10</span>I trust the leadership on my unit.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="11">
+      <div class="q"><span class="num">Q11</span>My team works well together.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="12">
+      <div class="q"><span class="num">Q12</span>I feel valued as a member of this team.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+
+    <div class="domain-h">Retention</div>
+    <div class="domain-sub">RECOMMEND  ·  INTENT TO LEAVE  ·  2-YEAR HORIZON</div>
+    <div class="likert" data-q="13">
+      <div class="q"><span class="num">Q13</span>I would recommend my unit as a good place to work.</div>
+      <div class="endpoints"><span>Strongly agree</span><span>Strongly disagree</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="14">
+      <div class="q"><span class="num">Q14</span>I have thought about leaving my current position in the past 6 months.</div>
+      <div class="endpoints"><span>Never</span><span>Very often</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="15">
+      <div class="q"><span class="num">Q15</span>I plan to still be working at this hospital 2 years from now.</div>
+      <div class="endpoints"><span>Definitely yes</span><span>Definitely no</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-likert-continue" disabled onclick="show('screen-open')">Continue to open-ended</button>
+      <button class="btn secondary" onclick="show('screen-demographics')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Open-ended ===== -->
+  <section class="screen" id="screen-open">
+    <div class="eyebrow">OPEN-ENDED  ·  STEP 4 OF 4</div>
+    <h2>Two open questions for leadership.</h2>
+
+    <div class="field" style="margin-top: 18px;">
+      <label>Q16. The single most important change that would improve your work environment?</label>
+      <textarea id="q16open" maxlength="500" placeholder="(Optional)"></textarea>
+      <div class="count"><span id="q16-count">0</span> / 500</div>
+    </div>
+    <div class="field">
+      <label>Q17. Is there anything else you want leadership to know?</label>
+      <textarea id="q17open" maxlength="500" placeholder="(Optional)"></textarea>
+      <div class="count"><span id="q17-count">0</span> / 500</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="submitComp()">Submit survey</button>
+      <button class="btn secondary" onclick="show('screen-likert')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Confirmation ===== -->
+  <section class="screen" id="screen-confirm">
+    <div style="text-align: center; padding: 20px 0;">
+      <div class="success-tick"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
+      <h1>Survey recorded.</h1>
+      <p class="lede">Thank you for taking the time.</p>
+    </div>
+
+    <div class="pulse-anchor" id="anchor-block" style="display: none;">
+      <div class="lbl">YOUR PULSE HISTORY</div>
+      <div class="row"><span class="k">Pulse check-ins since last comprehensive</span><span class="v small" id="anchor-count">—</span></div>
+      <div class="row"><span class="k">Average pulse score</span><span class="v" id="anchor-avg">—</span></div>
+      <div class="row"><span class="k">Trend</span><span class="v small"><span class="trend" id="anchor-trend">—</span></span></div>
+    </div>
+
+    <p class="muted" style="margin-top: 24px;">Your aggregated, anonymous data informs unit-level decisions on staffing, workflow, and leadership.</p>
+    <div class="actions">
+      <button class="btn" onclick="window.close ? window.close() : window.location.reload()">Done</button>
+    </div>
+  </section>
+
+  <!-- ===== Error ===== -->
+  <section class="screen" id="screen-error">
+    <div class="eyebrow" style="color:#9B2C2C">SOMETHING WENT WRONG</div>
+    <h2 id="err-title">We couldn't record your survey.</h2>
+    <p class="lede" id="err-msg">Please try again in a moment.</p>
+    <div class="actions">
+      <button class="btn" onclick="window.location.reload()">Try again</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="foot"><span class="gold">ROSC</span> · CLINICIAN-BUILT · INDEPENDENT · ANONYMOUS</div>
+
+<script>
+// =============== CONFIG — REPLACE BEFORE DEPLOY ===============
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwddWB5TTHi4oo5YTv9GBInIwkxhR09W58PMj1GwjLlSm86oP-ifLo7YRSfk4T7iF_T/exec';
+const API_KEY     = 'k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';
+// Set ?period=Baseline2026Q2 in URL, or change default below.
+const DEFAULT_PERIOD = 'Baseline2026Q2';
+// ===============================================================
+
+const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, period: DEFAULT_PERIOD };
+
+async function api(endpoint, method, body) {
+  const params = new URLSearchParams({ endpoint, key: API_KEY });
+  const url = `${BACKEND_URL}?${params}`;
+  const opts = { method };
+  if (method === 'POST') {
+    opts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+    opts.body = JSON.stringify(body || {});
+  }
+  const res = await fetch(url, opts);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('prog').style.display = (id === 'screen-likert' || id === 'screen-open') ? 'block' : 'none';
+  if (id === 'screen-likert') updateProgress();
+  if (id === 'screen-open') {
+    document.getElementById('prog-label').textContent = 'OPEN-ENDED';
+    document.getElementById('prog-count').textContent = 'Step 4 of 4';
+    document.getElementById('prog-fill').style.width = '100%';
+  }
+  window.scrollTo(0, 0);
+}
+
+function error(title, msg) {
+  document.getElementById('err-title').textContent = title;
+  document.getElementById('err-msg').textContent = msg;
+  show('screen-error');
+}
+
+async function init() {
+  const urlPeriod = new URLSearchParams(window.location.search).get('period');
+  if (urlPeriod) state.period = urlPeriod;
+  try {
+    const cfg = await api('config', 'GET');
+    const sel = document.getElementById('unit');
+    cfg.units.forEach(u => { const o = document.createElement('option'); o.value = u.unitname; o.textContent = u.unitname; sel.appendChild(o); });
+    const urlUnit = new URLSearchParams(window.location.search).get('unit');
+    if (urlUnit) sel.value = urlUnit;
+  } catch (e) { console.warn('Config load failed:', e.message); }
+}
+
+function validateSalc() {
+  let ok = true;
+  const checks = [
+    { id: 'a1', re: /^[A-Za-z]{2}$/, msg: 'Two letters' },
+    { id: 'a2', re: /^\d{2}$/, msg: 'Two digits' },
+    { id: 'a3', re: /^\d{1,2}$/, msg: 'A number' },
+    { id: 'a4', re: /^[A-Za-z]{2}$/, msg: 'Two letters' },
+    { id: 'a5', re: /^[A-Za-z]{1}$/, msg: 'One letter' },
+  ];
+  for (const c of checks) {
+    const v = document.getElementById(c.id).value.trim();
+    const field = document.getElementById('f-' + c.id);
+    field.classList.remove('error');
+    field.querySelectorAll('.err-msg').forEach(n => n.remove());
+    if (!c.re.test(v)) {
+      field.classList.add('error');
+      const e = document.createElement('div');
+      e.className = 'err-msg'; e.textContent = c.msg;
+      field.appendChild(e);
+      ok = false;
+    }
+  }
+  return ok;
+}
+
+async function submitSALC() {
+  if (!validateSalc()) return;
+  const btn = document.getElementById('btn-salc-continue');
+  btn.disabled = true; btn.textContent = 'Linking…';
+  try {
+    const data = await api('hash', 'POST', {
+      a1: document.getElementById('a1').value,
+      a2: document.getElementById('a2').value,
+      a3: document.getElementById('a3').value,
+      a4: document.getElementById('a4').value,
+      a5: document.getElementById('a5').value,
+      unit: '', role: '', shift: '',
+    });
+    state.hashid = data.hashid;
+    show('screen-demographics');
+  } catch (e) {
+    error('We couldn\'t link your survey.', e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Continue';
+  }
+}
+
+function submitDemographics() {
+  let ok = true;
+  for (const id of ['unit', 'role', 'shift']) {
+    const f = document.getElementById('f-' + id);
+    f.classList.remove('error');
+    if (!document.getElementById(id).value) { f.classList.add('error'); ok = false; }
+  }
+  if (!ok) return;
+  state.unit = document.getElementById('unit').value;
+  state.role = document.getElementById('role').value;
+  state.shift = document.getElementById('shift').value;
+  show('screen-likert');
+}
+
+function updateProgress() {
+  const total = 15;
+  const answered = Object.keys(state.answers).length;
+  document.getElementById('prog-label').textContent = currentDomain(answered);
+  document.getElementById('prog-count').textContent = `${answered} of ${total}`;
+  document.getElementById('prog-fill').style.width = `${(answered / total) * 100}%`;
+  document.getElementById('btn-likert-continue').disabled = answered < total;
+}
+
+function currentDomain(n) {
+  if (n < 5) return 'BURNOUT';
+  if (n < 9) return 'WORK ENVIRONMENT';
+  if (n < 12) return 'CULTURE';
+  if (n < 15) return 'RETENTION';
+  return 'COMPLETE';
+}
+
+document.querySelectorAll('.likert').forEach(l => {
+  l.querySelectorAll('.scale button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = l.dataset.q;
+      const v = +btn.dataset.v;
+      state.answers['q' + q] = v;
+      l.querySelectorAll('.scale button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateProgress();
+    });
+  });
+});
+
+document.getElementById('q16open').addEventListener('input', e => document.getElementById('q16-count').textContent = e.target.value.length);
+document.getElementById('q17open').addEventListener('input', e => document.getElementById('q17-count').textContent = e.target.value.length);
+
+async function submitComp() {
+  const payload = {
+    hashid: state.hashid,
+    unit: state.unit, role: state.role, shift: state.shift,
+    q16open: document.getElementById('q16open').value,
+    q17open: document.getElementById('q17open').value,
+    surveyperiod: state.period,
+  };
+  for (let i = 1; i <= 15; i++) payload['q' + i] = state.answers['q' + i];
+  try {
+    const data = await api('comprehensive', 'POST', payload);
+    if (data.pulsehistory && data.pulsehistory.count > 0) {
+      document.getElementById('anchor-count').textContent = data.pulsehistory.count;
+      document.getElementById('anchor-avg').textContent = data.pulsehistory.avg != null ? data.pulsehistory.avg : '—';
+      const trendEl = document.getElementById('anchor-trend');
+      const t = data.pulsehistory.trend;
+      trendEl.className = 'trend ' + t;
+      trendEl.textContent = t === 'up' ? '↑ Improving' : t === 'down' ? '↓ Declining' : '→ Stable';
+      document.getElementById('anchor-block').style.display = 'block';
+    }
+    show('screen-confirm');
+  } catch (e) {
+    error('We couldn\'t save your survey.', e.message);
+  }
+}
+
+['a1', 'a4', 'a5'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => e.target.value = e.target.value.toUpperCase());
+});
+
+init();
+</script>
+</body>
+</html>
