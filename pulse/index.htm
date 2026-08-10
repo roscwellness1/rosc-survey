@@ -1,1 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D0B08">
+<title>ROSC · Pulse Check-In</title>
+<link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlJPU0MgUHVsc2UgQ2hlY2staW4iLAogICJzaG9ydF9uYW1lIjogIlJPU0MgUHVsc2UiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBEMEIwOCIsCiAgInRoZW1lX2NvbG9yIjogIiMwRDBCMDgiCn0=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0D0B08; --gold: #B8922A; --gold-dark: #8C6E1F;
+  --cream: #E8E2D5; --paper: #FAF7F1; --ink: #2A2722;
+  --muted: #7A7268; --rule: #D9D2C2; --white: #FFFFFF;
+  --display: 'Cormorant Garamond', Georgia, serif;
+  --body: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 
+.brand-bar { background: var(--black); color: var(--cream); padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+.brand-bar .gold-mark { width: 18px; height: 2px; background: var(--gold); }
+.brand-bar .lbl { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--gold); }
+
+.app { flex: 1; padding: 28px 22px 100px; max-width: 520px; margin: 0 auto; width: 100%; }
+.eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--gold); margin-bottom: 10px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: 36px; line-height: 1.1; color: var(--ink); margin-bottom: 12px; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.2; color: var(--ink); margin-bottom: 16px; }
+p.lede { color: var(--ink); font-size: 15px; margin-bottom: 18px; }
+p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+
+.screen { display: none; animation: fadeIn 240ms ease; }
+.screen.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.card { background: var(--white); border: 1px solid var(--rule); padding: 18px; position: relative; margin-bottom: 14px; }
+.card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--gold); }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 6px; letter-spacing: 0.4px; }
+.field .hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-style: italic; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 14px 14px; font-family: var(--body); font-size: 16px; color: var(--ink);
+  background: var(--white); border: 1px solid var(--rule); border-radius: 0;
+  -webkit-appearance: none; appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--gold); border-width: 2px; padding: 13px 13px;
+}
+.field textarea { resize: vertical; min-height: 100px; }
+.field .count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; font-family: var(--mono); }
+.field.error input, .field.error select { border-color: #9B2C2C; }
+.field .err-msg { color: #9B2C2C; font-size: 12px; margin-top: 4px; }
+
+.likert { margin-bottom: 22px; }
+.likert .q { font-size: 15px; color: var(--ink); margin-bottom: 12px; line-height: 1.4; }
+.likert .endpoints { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; font-style: italic; }
+.likert .scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.likert .scale button {
+  background: var(--white); border: 1.5px solid var(--rule); color: var(--ink);
+  padding: 16px 0; font-family: var(--mono); font-size: 16px; font-weight: 500;
+  cursor: pointer; transition: all 120ms ease; min-height: 56px;
+  -webkit-tap-highlight-color: transparent;
+}
+.likert .scale button:hover { border-color: var(--gold); }
+.likert .scale button.selected { background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 600; }
+
+.btn { display: block; width: 100%; padding: 16px 20px; font-family: var(--body); font-size: 15px; font-weight: 600;
+  background: var(--gold); color: var(--black); border: none; cursor: pointer; letter-spacing: 0.5px;
+  transition: background 150ms ease; -webkit-tap-highlight-color: transparent; }
+.btn:hover { background: var(--gold-dark); color: var(--cream); }
+.btn:disabled { background: var(--rule); color: var(--muted); cursor: not-allowed; }
+.btn.secondary { background: transparent; color: var(--gold-dark); border: 1.5px solid var(--gold); }
+.btn.secondary:hover { background: var(--gold); color: var(--black); }
+.btn + .btn { margin-top: 10px; }
+
+.actions { margin-top: 28px; }
+
+.anon-note { background: var(--black); color: var(--cream); padding: 16px; font-size: 13px; margin: 16px 0 24px; border-left: 3px solid var(--gold); }
+.anon-note strong { color: var(--gold); font-weight: 600; letter-spacing: 0.3px; }
+
+.tag { display: inline-block; padding: 4px 10px; background: var(--gold); color: var(--black); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; border-radius: 100px; }
+.tag.subtle { background: var(--cream); color: var(--ink); }
+
+.stat-row { display: flex; gap: 16px; margin-top: 18px; }
+.stat-row .stat { flex: 1; text-align: center; padding: 14px; background: var(--white); border: 1px solid var(--rule); border-left: 3px solid var(--gold); }
+.stat-row .stat .n { font-family: var(--display); font-size: 32px; color: var(--gold); line-height: 1; }
+.stat-row .stat .l { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+.success-tick { width: 56px; height: 56px; border-radius: 50%; background: var(--gold); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.success-tick svg { width: 28px; height: 28px; stroke: var(--black); stroke-width: 3; fill: none; }
+
+.foot { position: fixed; bottom: 0; left: 0; right: 0; background: var(--black); color: var(--cream); padding: 10px 20px; font-size: 11px; text-align: center; letter-spacing: 1px; }
+.foot .gold { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="brand-bar">
+  <span class="gold-mark"></span>
+  <span class="lbl">ROSC · WORKFORCE INTELLIGENCE</span>
+</div>
+
+<main class="app">
+
+  <!-- ===== Welcome ===== -->
+  <section class="screen active" id="screen-welcome">
+    <div class="eyebrow">PULSE CHECK-IN</div>
+    <h1>How was your shift?</h1>
+    <div class="anon-note">
+      <strong>This is anonymous.</strong> Your hospital never sees your individual answers — only aggregate, unit-level scores. Takes about 60 seconds.
+    </div>
+    <p class="muted">Your input is part of a longitudinal measurement of clinician well-being. The more often you check in, the more accurate the unit's picture.</p>
+    <div class="actions">
+      <button class="btn" onclick="show('screen-salc')">Start check-in</button>
+    </div>
+  </section>
+
+  <!-- ===== SALC ID ===== -->
+  <section class="screen" id="screen-salc">
+    <div class="eyebrow">STEP 1 OF 4 · ANONYMOUS ID</div>
+    <h2>Five quick questions to link this check-in to your previous ones.</h2>
+    <p class="muted">We use your answers to generate a one-way anonymous identifier. The answers themselves are never stored — only their cryptographic hash.</p>
+
+    <div class="field" id="f-a1">
+      <label>1. First two letters of your mother's first name</label>
+      <div class="hint">Letters only · e.g., for "Maria" enter "MA"</div>
+      <input type="text" id="a1" maxlength="2" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="field" id="f-a2">
+      <label>2. Last two digits of your personal cell phone</label>
+      <div class="hint">Numbers only · e.g., for "...867" enter "67"</div>
+      <input type="text" id="a2" inputmode="numeric" maxlength="2" autocomplete="off">
+    </div>
+    <div class="field" id="f-a3">
+      <label>3. Number of siblings (including half / step)</label>
+      <div class="hint">Numbers only · enter "0" if none</div>
+      <input type="text" id="a3" inputmode="numeric" maxlength="2" autocomplete="off">
+    </div>
+    <div class="field" id="f-a4">
+      <label>4. Last two letters of your city of birth</label>
+      <div class="hint">Letters only · e.g., for "Boston" enter "ON"</div>
+      <input type="text" id="a4" maxlength="2" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    <div class="field" id="f-a5">
+      <label>5. First letter of the street where you grew up</label>
+      <div class="hint">One letter · e.g., for "Maple Ave." enter "M"</div>
+      <input type="text" id="a5" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-salc-continue" onclick="submitSALC()">Continue</button>
+      <button class="btn secondary" onclick="show('screen-welcome')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Prompt ===== -->
+  <section class="screen" id="screen-prompt">
+    <div class="eyebrow">WELCOME BACK</div>
+    <h1>It's been a while.</h1>
+    <p class="lede" id="prompt-text">It has been some time since your last check-in. Your input helps keep the unit data accurate. Thank you for checking in.</p>
+    <div class="actions">
+      <button class="btn" onclick="show('screen-demographics')">Continue</button>
+    </div>
+  </section>
+
+  <!-- ===== Demographics ===== -->
+  <section class="screen" id="screen-demographics">
+    <div class="eyebrow">STEP 2 OF 4 · YOUR ROLE</div>
+    <h2>Tell us which unit and role you're checking in for.</h2>
+
+    <div class="field" id="f-unit">
+      <label>Unit</label>
+      <select id="unit"><option value="">— Select —</option></select>
+    </div>
+    <div class="field" id="f-role">
+      <label>Role</label>
+      <select id="role">
+        <option value="">— Select —</option>
+        <option>RN</option><option>Tech</option><option>MA</option>
+        <option>Ancillary</option><option>APP</option><option>MD</option>
+      </select>
+    </div>
+    <div class="field" id="f-shift">
+      <label>Shift</label>
+      <select id="shift">
+        <option value="">— Select —</option>
+        <option>Day</option><option>Night</option><option>Rotating</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="submitDemographics()">Continue</button>
+      <button class="btn secondary" onclick="show('screen-salc')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Pulse Questions ===== -->
+  <section class="screen" id="screen-pulse">
+    <div class="eyebrow">STEP 3 OF 4 · YOUR SHIFT</div>
+    <h2>Five quick questions about today.</h2>
+
+    <div class="likert" data-q="1">
+      <div class="q">1. How burned out are you right now?</div>
+      <div class="endpoints"><span>Not at all</span><span>Completely</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="2">
+      <div class="q">2. How manageable was your workload today?</div>
+      <div class="endpoints"><span>Very manageable</span><span>Unmanageable</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="3">
+      <div class="q">3. How adequate was staffing on your unit today?</div>
+      <div class="endpoints"><span>Fully staffed</span><span>Dangerously short</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="4">
+      <div class="q">4. How would you describe the atmosphere on your unit?</div>
+      <div class="endpoints"><span>Calm / supportive</span><span>Chaotic / hostile</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="likert" data-q="5">
+      <div class="q">5. Overall, how was your shift?</div>
+      <div class="endpoints"><span>Great</span><span>Terrible</span></div>
+      <div class="scale"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-pulse-continue" disabled onclick="show('screen-open')">Continue</button>
+      <button class="btn secondary" onclick="show('screen-demographics')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Open text ===== -->
+  <section class="screen" id="screen-open">
+    <div class="eyebrow">STEP 4 OF 4 · OPTIONAL</div>
+    <h2>One thing that would have made today better?</h2>
+    <p class="muted">Skip if you want — open responses are aggregated for theme analysis only.</p>
+
+    <div class="field">
+      <textarea id="opentext" maxlength="500" placeholder="(Optional)"></textarea>
+      <div class="count"><span id="opentext-count">0</span> / 500</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="submitPulse()">Submit check-in</button>
+      <button class="btn secondary" onclick="show('screen-pulse')">Back</button>
+    </div>
+  </section>
+
+  <!-- ===== Confirmation ===== -->
+  <section class="screen" id="screen-confirm">
+    <div style="text-align: center; padding: 20px 0;">
+      <div class="success-tick"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
+      <h1>Check-in recorded.</h1>
+      <p class="lede">Thank you for the 60 seconds.</p>
+      <div class="stat-row" id="history-row" style="display: none;">
+        <div class="stat"><div class="n" id="hist-count">—</div><div class="l">CHECK-INS</div></div>
+        <div class="stat"><div class="n" id="hist-avg">—</div><div class="l">YOUR AVG / 100</div></div>
+      </div>
+      <p class="muted" style="margin-top: 24px;">Your hospital sees the unit's aggregate score — never your individual answers.</p>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="window.close ? window.close() : window.location.reload()">Done</button>
+    </div>
+  </section>
+
+  <!-- ===== Error ===== -->
+  <section class="screen" id="screen-error">
+    <div class="eyebrow" style="color:#9B2C2C">SOMETHING WENT WRONG</div>
+    <h2 id="err-title">We couldn't record your check-in.</h2>
+    <p class="lede" id="err-msg">Please try again in a moment.</p>
+    <div class="actions">
+      <button class="btn" onclick="window.location.reload()">Try again</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="foot"><span class="gold">ROSC</span> · CLINICIAN-BUILT · INDEPENDENT · ANONYMOUS</div>
+
+<script>
+// =============== CONFIG — REPLACE BEFORE DEPLOY ===============
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwddWB5TTHi4oo5YTv9GBInIwkxhR09W58PMj1GwjLlSm86oP-ifLo7YRSfk4T7iF_T/exec';   // Apps Script Web App URL
+const API_KEY     = 'k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';        // Script Property API_KEY value
+// ===============================================================
+
+const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, opentext: '' };
+
+// ---- API helper ----
+async function api(endpoint, method, body) {
+  const params = new URLSearchParams({ endpoint, key: API_KEY });
+  const url = `${BACKEND_URL}?${params}`;
+  const opts = { method };
+  if (method === 'POST') {
+    // Content-Type: text/plain avoids CORS preflight on Apps Script
+    opts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+    opts.body = JSON.stringify(body || {});
+  }
+  const res = await fetch(url, opts);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// ---- Navigation ----
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function error(title, msg) {
+  document.getElementById('err-title').textContent = title || 'We couldn\'t record your check-in.';
+  document.getElementById('err-msg').textContent = msg || 'Please try again in a moment.';
+  show('screen-error');
+}
+
+// ---- Init: load unit list, pre-select from ?unit= ----
+async function init() {
+  try {
+    const cfg = await api('config', 'GET');
+    const sel = document.getElementById('unit');
+    cfg.units.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.unitname; opt.textContent = u.unitname;
+      sel.appendChild(opt);
+    });
+    // Pre-select unit from URL ?unit=ICU
+    const urlUnit = new URLSearchParams(window.location.search).get('unit');
+    if (urlUnit) sel.value = urlUnit;
+  } catch (e) {
+    console.warn('Could not load units:', e.message);
+  }
+}
+
+// ---- SALC validation + submit ----
+function validateSalc() {
+  let ok = true;
+  const checks = [
+    { id: 'a1', re: /^[A-Za-z]{2}$/, msg: 'Two letters' },
+    { id: 'a2', re: /^\d{2}$/,       msg: 'Two digits'  },
+    { id: 'a3', re: /^\d{1,2}$/,     msg: 'A number'    },
+    { id: 'a4', re: /^[A-Za-z]{2}$/, msg: 'Two letters' },
+    { id: 'a5', re: /^[A-Za-z]{1}$/, msg: 'One letter'  },
+  ];
+  for (const c of checks) {
+    const v = document.getElementById(c.id).value.trim();
+    const field = document.getElementById('f-' + c.id);
+    field.classList.remove('error');
+    field.querySelectorAll('.err-msg').forEach(n => n.remove());
+    if (!c.re.test(v)) {
+      field.classList.add('error');
+      const e = document.createElement('div');
+      e.className = 'err-msg'; e.textContent = c.msg;
+      field.appendChild(e);
+      ok = false;
+    }
+  }
+  return ok;
+}
+
+async function submitSALC() {
+  if (!validateSalc()) return;
+  const btn = document.getElementById('btn-salc-continue');
+  btn.disabled = true; btn.textContent = 'Linking…';
+  try {
+    const data = await api('hash', 'POST', {
+      a1: document.getElementById('a1').value,
+      a2: document.getElementById('a2').value,
+      a3: document.getElementById('a3').value,
+      a4: document.getElementById('a4').value,
+      a5: document.getElementById('a5').value,
+      unit: '', role: '', shift: '',  // collected next screen
+    });
+    state.hashid = data.hashid;
+    state.checkincount = data.checkincount;
+    state.averagepulsescore = data.averagepulsescore;
+    if (data.promptdue) {
+      const days = data.checkincount > 0 ? '14+ days' : '';
+      document.getElementById('prompt-text').textContent = 
+        `It's been ${days} since your last check-in. Your input helps keep the unit's data accurate. Thank you for coming back.`;
+      show('screen-prompt');
+    } else {
+      show('screen-demographics');
+    }
+  } catch (e) {
+    error('We couldn\'t link your check-in.', e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Continue';
+  }
+}
+
+// ---- Demographics ----
+function submitDemographics() {
+  const unit = document.getElementById('unit').value;
+  const role = document.getElementById('role').value;
+  const shift = document.getElementById('shift').value;
+  let ok = true;
+  for (const id of ['unit', 'role', 'shift']) {
+    const f = document.getElementById('f-' + id);
+    f.classList.remove('error');
+    if (!document.getElementById(id).value) { f.classList.add('error'); ok = false; }
+  }
+  if (!ok) return;
+  state.unit = unit; state.role = role; state.shift = shift;
+  show('screen-pulse');
+}
+
+// ---- Likert scales ----
+document.querySelectorAll('.likert').forEach(l => {
+  l.querySelectorAll('.scale button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = l.dataset.q;
+      const v = +btn.dataset.v;
+      state.answers['q' + q] = v;
+      l.querySelectorAll('.scale button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const allAnswered = [1,2,3,4,5].every(n => state.answers['q' + n]);
+      document.getElementById('btn-pulse-continue').disabled = !allAnswered;
+    });
+  });
+});
+
+// ---- Open text counter ----
+document.getElementById('opentext').addEventListener('input', e => {
+  document.getElementById('opentext-count').textContent = e.target.value.length;
+});
+
+// ---- Submit pulse ----
+async function submitPulse() {
+  state.opentext = document.getElementById('opentext').value;
+  try {
+    const data = await api('pulse', 'POST', {
+      hashid: state.hashid,
+      unit: state.unit, role: state.role, shift: state.shift,
+      q1: state.answers.q1, q2: state.answers.q2, q3: state.answers.q3,
+      q4: state.answers.q4, q5: state.answers.q5,
+      opentext: state.opentext,
+    });
+    if (data.checkincount > 1) {
+      document.getElementById('hist-count').textContent = data.checkincount;
+      document.getElementById('hist-avg').textContent = data.averagepulsescore != null ? data.averagepulsescore : '—';
+      document.getElementById('history-row').style.display = 'flex';
+    }
+    show('screen-confirm');
+  } catch (e) {
+    error('We couldn\'t save your check-in.', e.message);
+  }
+}
+
+// Auto-uppercase the letter fields
+['a1', 'a4', 'a5'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+});
+
+init();
+</script>
+</body>
+</html>
