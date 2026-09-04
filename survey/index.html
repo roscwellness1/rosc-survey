@@ -120,6 +120,30 @@ p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
 
 <main class="app">
 
+  <!-- ===== Token Welcome (skipped if no ?t= in URL) ===== -->
+  <section class="screen" id="screen-token-welcome">
+    <div class="eyebrow">COMPREHENSIVE SURVEY  ·  5–8 MINUTES</div>
+    <h1>The longer view of your work.</h1>
+    <div class="anon-note">
+      <strong>You've been sent a personal link.</strong> Your response is anonymous — the hospital sees unit-level scores only, never who submitted them.
+    </div>
+    <p class="muted" id="token-context">Preparing your survey…</p>
+    <div class="actions">
+      <button class="btn" id="btn-token-start" onclick="show('screen-likert')" disabled>Begin</button>
+    </div>
+  </section>
+
+  <!-- ===== Already checked in this window ===== -->
+  <section class="screen" id="screen-already">
+    <div class="eyebrow">ALREADY COMPLETED</div>
+    <h1>You're all set.</h1>
+    <p class="lede" id="already-msg">You've already completed this comprehensive survey for the current period. Thank you.</p>
+    <p class="muted">The next survey window will send a fresh link.</p>
+    <div class="actions">
+      <button class="btn secondary" onclick="window.close ? window.close() : window.location.reload()">Close</button>
+    </div>
+  </section>
+
   <!-- ===== Welcome ===== -->
   <section class="screen active" id="screen-welcome">
     <div class="eyebrow">COMPREHENSIVE SURVEY  ·  5–8 MINUTES</div>
@@ -327,11 +351,12 @@ const API_KEY     = 'k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';
 const DEFAULT_PERIOD = 'Baseline2026Q2';
 // ===============================================================
 
-const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, period: DEFAULT_PERIOD };
+const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, period: DEFAULT_PERIOD, token: null };
 
-async function api(endpoint, method, body) {
-  const params = new URLSearchParams({ endpoint, key: API_KEY });
-  const url = `${BACKEND_URL}?${params}`;
+async function api(endpoint, method, body, extraParams) {
+  const p = { endpoint, key: API_KEY };
+  if (extraParams) Object.assign(p, extraParams);
+  const url = `${BACKEND_URL}?${new URLSearchParams(p)}`;
   const opts = { method };
   if (method === 'POST') {
     opts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
@@ -363,13 +388,47 @@ function error(title, msg) {
 }
 
 async function init() {
-  const urlPeriod = new URLSearchParams(window.location.search).get('period');
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPeriod = urlParams.get('period');
   if (urlPeriod) state.period = urlPeriod;
+  const token = urlParams.get('t');
+
+  // ===== Token flow =====
+  if (token) {
+    state.token = token;
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-token-welcome').classList.add('active');
+    try {
+      const t = await api('token', 'GET', null, { t: token });
+      if (t.comp_used) {
+        document.getElementById('already-msg').textContent =
+          `You've already completed this survey for the current period (${t.comp_window || 'this window'}). Thank you.`;
+        show('screen-already');
+        return;
+      }
+      state.unit = t.unit;
+      state.role = t.role;
+      state.shift = t.shift || 'Rotating';
+      document.getElementById('token-context').innerHTML =
+        `<strong>${t.unit}</strong> · ${t.role} · ${state.shift}`;
+      document.getElementById('btn-token-start').disabled = false;
+    } catch (e) {
+      const msg = e.message === 'Invalid or unknown token'
+        ? 'This survey link is not recognized. Ask your unit for a fresh link.'
+        : e.message === 'Token is deactivated'
+        ? 'This survey link has been deactivated.'
+        : 'We couldn\'t validate your survey link.';
+      error('Link not valid.', msg);
+    }
+    return;
+  }
+
+  // ===== SALC flow (no token) =====
   try {
     const cfg = await api('config', 'GET');
     const sel = document.getElementById('unit');
     cfg.units.forEach(u => { const o = document.createElement('option'); o.value = u.unitname; o.textContent = u.unitname; sel.appendChild(o); });
-    const urlUnit = new URLSearchParams(window.location.search).get('unit');
+    const urlUnit = urlParams.get('unit');
     if (urlUnit) sel.value = urlUnit;
   } catch (e) { console.warn('Config load failed:', e.message); }
 }
@@ -470,12 +529,16 @@ document.getElementById('q17open').addEventListener('input', e => document.getEl
 
 async function submitComp() {
   const payload = {
-    hashid: state.hashid,
     unit: state.unit, role: state.role, shift: state.shift,
     q16open: document.getElementById('q16open').value,
     q17open: document.getElementById('q17open').value,
     surveyperiod: state.period,
   };
+  if (state.token) {
+    payload.token = state.token;
+  } else {
+    payload.hashid = state.hashid;
+  }
   for (let i = 1; i <= 15; i++) payload['q' + i] = state.answers['q' + i];
   try {
     const data = await api('comprehensive', 'POST', payload);
@@ -490,7 +553,12 @@ async function submitComp() {
     }
     show('screen-confirm');
   } catch (e) {
-    error('We couldn\'t save your survey.', e.message);
+    if (e.message === 'ALREADY_CHECKED_IN') {
+      document.getElementById('already-msg').textContent = 'This survey was already recorded for the current period.';
+      show('screen-already');
+    } else {
+      error('We couldn\'t save your survey.', e.message);
+    }
   }
 }
 
