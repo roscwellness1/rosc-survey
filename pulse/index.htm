@@ -107,6 +107,30 @@ p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
 
 <main class="app">
 
+  <!-- ===== Token Welcome (skipped if no ?t= in URL) ===== -->
+  <section class="screen" id="screen-token-welcome">
+    <div class="eyebrow">PULSE CHECK-IN</div>
+    <h1>How was your shift?</h1>
+    <div class="anon-note">
+      <strong>You've been sent a personal link.</strong> Your response is anonymous — the hospital sees unit-level scores only, never who submitted them.
+    </div>
+    <p class="muted" id="token-context">Preparing your check-in…</p>
+    <div class="actions">
+      <button class="btn" id="btn-token-start" onclick="show('screen-pulse')" disabled>Start check-in</button>
+    </div>
+  </section>
+
+  <!-- ===== Already checked in this window ===== -->
+  <section class="screen" id="screen-already">
+    <div class="eyebrow">ALREADY CHECKED IN</div>
+    <h1>You're all set.</h1>
+    <p class="lede" id="already-msg">You've already completed a check-in for the current period. Thank you.</p>
+    <p class="muted">A fresh check-in link will be available at the start of the next window.</p>
+    <div class="actions">
+      <button class="btn secondary" onclick="window.close ? window.close() : window.location.reload()">Close</button>
+    </div>
+  </section>
+
   <!-- ===== Welcome ===== -->
   <section class="screen active" id="screen-welcome">
     <div class="eyebrow">PULSE CHECK-IN</div>
@@ -290,12 +314,13 @@ const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwddWB5TTHi4oo5YTv9
 const API_KEY     = 'k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';        // Script Property API_KEY value
 // ===============================================================
 
-const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, opentext: '' };
+const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, opentext: '', token: null };
 
 // ---- API helper ----
-async function api(endpoint, method, body) {
-  const params = new URLSearchParams({ endpoint, key: API_KEY });
-  const url = `${BACKEND_URL}?${params}`;
+async function api(endpoint, method, body, extraParams) {
+  const p = { endpoint, key: API_KEY };
+  if (extraParams) Object.assign(p, extraParams);
+  const url = `${BACKEND_URL}?${new URLSearchParams(p)}`;
   const opts = { method };
   if (method === 'POST') {
     // Content-Type: text/plain avoids CORS preflight on Apps Script
@@ -321,8 +346,43 @@ function error(title, msg) {
   show('screen-error');
 }
 
-// ---- Init: load unit list, pre-select from ?unit= ----
+// ---- Init: token flow if ?t=TOKEN present, else classic SALC flow ----
 async function init() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('t');
+
+  // ===== Token flow =====
+  if (token) {
+    state.token = token;
+    // Hide the default welcome, show the token-welcome
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-token-welcome').classList.add('active');
+    try {
+      const t = await api('token', 'GET', null, { t: token });
+      if (t.pulse_used) {
+        document.getElementById('already-msg').textContent =
+          `You've already checked in for the current period (${t.pulse_window || 'this window'}). Thank you.`;
+        show('screen-already');
+        return;
+      }
+      state.unit = t.unit;
+      state.role = t.role;
+      state.shift = t.shift || 'Rotating';
+      document.getElementById('token-context').innerHTML =
+        `<strong>${t.unit}</strong> · ${t.role} · ${state.shift}`;
+      document.getElementById('btn-token-start').disabled = false;
+    } catch (e) {
+      const msg = e.message === 'Invalid or unknown token'
+        ? 'This check-in link is not recognized. Ask your unit for a fresh link.'
+        : e.message === 'Token is deactivated'
+        ? 'This check-in link has been deactivated.'
+        : 'We couldn\'t validate your check-in link.';
+      error('Link not valid.', msg);
+    }
+    return;
+  }
+
+  // ===== SALC flow (no token) — original behavior =====
   try {
     const cfg = await api('config', 'GET');
     const sel = document.getElementById('unit');
@@ -332,7 +392,7 @@ async function init() {
       sel.appendChild(opt);
     });
     // Pre-select unit from URL ?unit=ICU
-    const urlUnit = new URLSearchParams(window.location.search).get('unit');
+    const urlUnit = urlParams.get('unit');
     if (urlUnit) sel.value = urlUnit;
   } catch (e) {
     console.warn('Could not load units:', e.message);
@@ -435,14 +495,19 @@ document.getElementById('opentext').addEventListener('input', e => {
 // ---- Submit pulse ----
 async function submitPulse() {
   state.opentext = document.getElementById('opentext').value;
+  const payload = {
+    unit: state.unit, role: state.role, shift: state.shift,
+    q1: state.answers.q1, q2: state.answers.q2, q3: state.answers.q3,
+    q4: state.answers.q4, q5: state.answers.q5,
+    opentext: state.opentext,
+  };
+  if (state.token) {
+    payload.token = state.token;  // backend derives hashid from token
+  } else {
+    payload.hashid = state.hashid;
+  }
   try {
-    const data = await api('pulse', 'POST', {
-      hashid: state.hashid,
-      unit: state.unit, role: state.role, shift: state.shift,
-      q1: state.answers.q1, q2: state.answers.q2, q3: state.answers.q3,
-      q4: state.answers.q4, q5: state.answers.q5,
-      opentext: state.opentext,
-    });
+    const data = await api('pulse', 'POST', payload);
     if (data.checkincount > 1) {
       document.getElementById('hist-count').textContent = data.checkincount;
       document.getElementById('hist-avg').textContent = data.averagepulsescore != null ? data.averagepulsescore : '—';
@@ -450,7 +515,13 @@ async function submitPulse() {
     }
     show('screen-confirm');
   } catch (e) {
-    error('We couldn\'t save your check-in.', e.message);
+    // Race condition: user opened two tabs and submitted twice
+    if (e.message === 'ALREADY_CHECKED_IN') {
+      document.getElementById('already-msg').textContent = 'This check-in was already recorded for the current period.';
+      show('screen-already');
+    } else {
+      error('We couldn\'t save your check-in.', e.message);
+    }
   }
 }
 
