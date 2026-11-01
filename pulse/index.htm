@@ -310,26 +310,43 @@ p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
 
 <script>
 // =============== CONFIG — REPLACE BEFORE DEPLOY ===============
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwddWB5TTHi4oo5YTv9GBInIwkxhR09W58PMj1GwjLlSm86oP-ifLo7YRSfk4T7iF_T/exec';   // Apps Script Web App URL
-const API_KEY     = 'k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';        // Script Property API_KEY value
-// ===============================================================
+// ---- API connection through Vercel proxy ----
 
-const state = { hashid: null, unit: '', role: '', shift: '', answers: {}, opentext: '', token: null };
+const API_URL = '/api/pulse';
+
+const state = {
+  hashid: null,
+  unit: '',
+  role: '',
+  shift: '',
+  answers: {},
+  opentext: '',
+  token: null
+};
 
 // ---- API helper ----
 async function api(endpoint, method, body, extraParams) {
-  const p = { endpoint, key: API_KEY };
+  const p = { endpoint };
+
   if (extraParams) Object.assign(p, extraParams);
-  const url = `${BACKEND_URL}?${new URLSearchParams(p)}`;
+
+  const url = `${API_URL}?${new URLSearchParams(p)}`;
   const opts = { method };
+
   if (method === 'POST') {
-    // Content-Type: text/plain avoids CORS preflight on Apps Script
-    opts.headers = { 'Content-Type': 'text/plain;charset=UTF-8' };
+    opts.headers = {
+      'Content-Type': 'application/json'
+    };
     opts.body = JSON.stringify(body || {});
   }
+
   const res = await fetch(url, opts);
   const data = await res.json();
-  if (data.error) throw new Error(data.error);
+
+  if (!res.ok || data.error) {
+    throw new Error(data.error || 'Request failed');
+  }
+
   return data;
 }
 
