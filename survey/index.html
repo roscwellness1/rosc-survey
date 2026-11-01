@@ -104,34 +104,22 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="footer">ROSC · CLINICIAN-BUILT · INDEPENDENT</div>
 
 <script>
-const BACKEND_URL='https://script.google.com/macros/s/AKfycbwddWB5TTHi4oo5YTv9GBInIwkxhR09W58PMj1GwjLlSm86oP-ifLo7YRSfk4T7iF_T/exec';
-const API_KEY='k7Xm2QpR9vNb4LhY8jFwZ3sT6yUeAoCdG1iMxV5nBqK';
-const DEFAULT_PERIOD='GenericPilot';
-
-const state={
- hashid:'',
- unit:'',
- role:'',
- shift:'',
- answers:{},
- period:new URLSearchParams(location.search).get('period')||DEFAULT_PERIOD
-};
-
+const DEFAULT_PERIOD='Baseline2026Q2';
+const state={hashid:'',unit:'',role:'',shift:'',answers:{},period:new URLSearchParams(location.search).get('period')||DEFAULT_PERIOD};
 const $=id=>document.getElementById(id);
 
 async function api(endpoint,method,body){
- const url=BACKEND_URL+'?'+new URLSearchParams({endpoint,key:API_KEY});
- const opts={method};
- if(method==='POST'){
-  opts.headers={'Content-Type':'text/plain;charset=UTF-8'};
-  opts.body=JSON.stringify(body);
- }
- const response=await fetch(url,opts);
- const data=await response.json();
- if(data.error)throw Error(data.error);
- return data;
+  const url='/api/comprehensive?'+new URLSearchParams({endpoint});
+  const opts={method};
+  if(method==='POST'){
+    opts.headers={'Content-Type':'application/json'};
+    opts.body=JSON.stringify(body);
+  }
+  const response=await fetch(url,opts);
+  const data=await response.json();
+  if(!response.ok || data.error) throw Error(data.error || 'Request failed');
+  return data;
 }
-
 function show(id){
  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
  $(id).classList.add('active');
