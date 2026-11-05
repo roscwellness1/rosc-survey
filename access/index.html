@@ -89,7 +89,46 @@ footer {
     small groups suppressed to protect privacy.
   </div>
 
-  <button type="button">ACCESS SURVEY</button>
+<button type="button" onclick="document.getElementById('consent').style.display='block'; document.getElementById('welcome').style.display='none';">
+  ACCESS SURVEY
+</button>
+  <section id="consent" style="display:none;">
+  <div class="eyebrow">PARTICIPATION & CONSENT</div>
+  <h1>Before you begin.</h1>
+
+  <p>
+    Participation in the ROSC Workforce Intelligence survey is voluntary.
+    You may decline or stop at any time without employment-related consequences.
+  </p>
+
+  <p>
+    ROSC uses five SALC responses to generate a coded identifier that can
+    link your survey responses over time. Your raw SALC answers are used
+    to generate that identifier and are not intended to be stored as
+    survey responses.
+  </p>
+
+  <p>
+    Survey data is intended for workforce analysis and aggregate reporting.
+    Results for groups with fewer than five respondents will be suppressed.
+    The coded identifier may allow responses to be linked over time, so
+    participation should not be considered completely anonymous.
+  </p>
+
+  <p>
+    By selecting Accept, you confirm that you have read this information
+    and voluntarily agree to participate.
+  </p>
+
+  <button type="button" onclick="alert('Consent recording and survey routing are not yet connected.');">
+    ACCEPT & CONTINUE
+  </button>
+
+  <button type="button" class="secondary"
+    onclick="document.getElementById('consent').style.display='none'; document.getElementById('welcome').style.display='block';">
+    DECLINE
+  </button>
+</section>
 </main>
 
 <footer>ROSC · WORKFORCE INTELLIGENCE</footer>
