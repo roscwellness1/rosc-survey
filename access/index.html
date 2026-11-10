@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0D0B08">
 <title>ROSC · Workforce Intelligence</title>
+
 <style>
 :root {
   --black:#0D0B08;
@@ -14,13 +16,16 @@
   --ink:#2A2722;
   --muted:#7A7268;
 }
+
 * { box-sizing:border-box; }
+
 body {
   margin:0;
   background:var(--paper);
   color:var(--ink);
   font:16px/1.5 Arial,sans-serif;
 }
+
 .brand {
   background:var(--black);
   color:var(--gold);
@@ -29,22 +34,27 @@ body {
   letter-spacing:2px;
   font-weight:bold;
 }
+
 main {
   max-width:620px;
   margin:70px auto;
   padding:28px 24px;
 }
+
 .eyebrow {
   color:var(--gold);
   font-size:11px;
   letter-spacing:2px;
   font-weight:bold;
 }
+
 h1 {
   font:normal 42px/1.15 Georgia,serif;
   margin:18px 0;
 }
+
 p { color:var(--muted); }
+
 .note {
   background:var(--black);
   color:var(--cream);
@@ -52,27 +62,65 @@ p { color:var(--muted); }
   border-left:3px solid var(--gold);
   margin:28px 0;
 }
-button {
+
+.choices {
+  display:grid;
+  gap:16px;
+  margin-top:30px;
+}
+
+.choice {
+  display:block;
   width:100%;
-  padding:17px;
-  background:var(--gold);
-  border:0;
-  font-size:15px;
-  font-weight:bold;
+  padding:22px;
+  text-align:left;
+  background:var(--black);
+  color:var(--cream);
+  border:1px solid var(--gold);
   cursor:pointer;
 }
+
+.choice:hover {
+  background:#252016;
+}
+
+.choice strong {
+  display:block;
+  color:var(--gold);
+  font:normal 23px Georgia,serif;
+  margin-bottom:8px;
+}
+
+.choice span {
+  display:block;
+  color:var(--cream);
+  font-size:14px;
+}
+
 footer {
   text-align:center;
   color:var(--muted);
   font-size:11px;
   padding:20px;
 }
+
+@media(max-width:600px) {
+  main {
+    margin:35px auto;
+    padding:24px 20px;
+  }
+
+  h1 { font-size:36px; }
+}
 </style>
 </head>
+
 <body>
+
 <div class="brand">ROSC · WORKFORCE INTELLIGENCE</div>
 
 <main>
+
   <div class="eyebrow">PRESERVE THE PROVIDER</div>
 
   <h1>Your voice shapes the future of healthcare.</h1>
@@ -84,53 +132,72 @@ footer {
   </p>
 
   <div class="note">
-    Your participation is voluntary. Survey responses
-    are designed to be reported in aggregate, with
-    small groups suppressed to protect privacy.
+    Participation is voluntary. Survey responses are
+    designed to be reported in aggregate, with groups
+    smaller than five suppressed to protect privacy.
   </div>
 
-<button type="button" onclick="document.getElementById('consent').style.display='block'; document.getElementById('welcome').style.display='none';">
-  ACCESS SURVEY
-</button>
-  <section id="consent" style="display:none;">
-  <div class="eyebrow">PARTICIPATION & CONSENT</div>
-  <h1>Before you begin.</h1>
+  <h2 style="font:normal 25px Georgia,serif;">
+    Choose your survey.
+  </h2>
 
   <p>
-    Participation in the ROSC Workforce Intelligence survey is voluntary.
-    You may decline or stop at any time without employment-related consequences.
+    Select the survey you would like to complete.
+    You will review the participation information
+    and provide consent before beginning.
   </p>
 
-  <p>
-    ROSC uses five SALC responses to generate a coded identifier that can
-    link your survey responses over time. Your raw SALC answers are used
-    to generate that identifier and are not intended to be stored as
-    survey responses.
-  </p>
+  <div class="choices">
 
-  <p>
-    Survey data is intended for workforce analysis and aggregate reporting.
-    Results for groups with fewer than five respondents will be suppressed.
-    The coded identifier may allow responses to be linked over time, so
-    participation should not be considered completely anonymous.
-  </p>
+    <button class="choice" type="button"
+      onclick="goToSurvey('survey')">
+      <strong>Comprehensive Workforce Survey</strong>
+      <span>
+        A full assessment of workplace experience,
+        staffing, workload, leadership, and workforce conditions.
+      </span>
+    </button>
 
-  <p>
-    By selecting Accept, you confirm that you have read this information
-    and voluntarily agree to participate.
-  </p>
+    <button class="choice" type="button"
+      onclick="goToSurvey('pulse')">
+      <strong>Pulse Check-In</strong>
+      <span>
+        A brief recurring check-in about your
+        current workplace experience.
+      </span>
+    </button>
 
-  <button type="button" onclick="alert('Consent recording and survey routing are not yet connected.');">
-    ACCEPT & CONTINUE
-  </button>
+  </div>
 
-  <button type="button" class="secondary"
-    onclick="document.getElementById('consent').style.display='none'; document.getElementById('welcome').style.display='block';">
-    DECLINE
-  </button>
-</section>
 </main>
 
 <footer>ROSC · WORKFORCE INTELLIGENCE</footer>
+
+<script>
+function goToSurvey(type) {
+  const params = new URLSearchParams(location.search);
+  const destination = new URL(
+    type === 'pulse' ? '/pulse/' : '/survey/',
+    location.origin
+  );
+
+  // Preserve the survey period when supplied.
+  const period = params.get('period');
+  if (period) {
+    destination.searchParams.set('period', period);
+  }
+
+  // Preserve Pulse invitation tokens only for Pulse.
+  if (type === 'pulse') {
+    const token = params.get('token');
+    if (token) {
+      destination.searchParams.set('token', token);
+    }
+  }
+
+  location.href = destination.toString();
+}
+</script>
+
 </body>
 </html>
