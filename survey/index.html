@@ -105,7 +105,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <script>
 const DEFAULT_PERIOD='Baseline2026Q2';
-const state={hashid:'',unit:'',role:'',shift:'',answers:{},period:new URLSearchParams(location.search).get('period')||DEFAULT_PERIOD};
+const state={hashid:'',unit:'',role:'',shift:'',answers:{},consentId:'',period:new URLSearchParams(location.search).get('period')||DEFAULT_PERIOD};
 const $=id=>document.getElementById(id);
 
 async function api(endpoint,method,body){
