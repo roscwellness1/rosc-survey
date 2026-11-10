@@ -354,11 +354,12 @@ async function submitSurvey(){
 
  const payload={
   hashid:state.hashid,
+  consentId:state.consentId,
   unit:state.unit,
   role:state.role,
   shift:state.shift,
   surveyperiod:state.period
- };
+};
 
  for(let i=1;i<=5;i++){
   payload['a'+i]=i===4
