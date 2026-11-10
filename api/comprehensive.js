@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   const endpoint = req.query.endpoint;
 
-  if (!["config", "hash", "comprehensive_v2"].includes(endpoint)) {
+if (!["config", "hash", "consent", "comprehensive_v2"].includes(endpoint)) {
     return res.status(400).json({ error: "Invalid endpoint" });
   }
 
