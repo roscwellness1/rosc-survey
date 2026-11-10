@@ -50,9 +50,31 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h1>The longer view of your work.</h1>
 <div class="note"><strong>Shared SALC login.</strong> Use the same five SALC answers you use for Pulse. ROSC uses a coded identifier to link your responses over time. Reports are aggregated; subgroup scores are suppressed below five respondents.</div>
 <p class="lede">This survey covers work demands, voice, leadership, growth, team culture, and retention. Profile questions are descriptive and are not included in your score.</p>
-<button onclick="show('salc')">Begin</button>
+<button onclick="show('consent')">Begin</button>
 </section>
+<section class="screen" id="consent">
+  <div class="eyebrow">INFORMED CONSENT</div>
+  <h1>Your participation is voluntary.</h1>
+  <p class="lede">Before continuing, please review the following:</p>
 
+  <div class="note">
+    <p><strong>Purpose:</strong> ROSC Workforce Intelligence collects anonymous workforce feedback to understand clinician experiences and identify trends.</p>
+    <p><strong>Voluntary participation:</strong> Participation is your choice. You may stop at any time before submitting your survey.</p>
+    <p><strong>Privacy:</strong> Your responses are analyzed in aggregate. Reports suppress subgroup results with fewer than five respondents.</p>
+    <p><strong>Confidentiality:</strong> Your SALC answers are used to create a coded identifier and are not included in your survey responses.</p>
+    <p><strong>Questions:</strong> You may contact the ROSC Workforce Intelligence team with questions about this survey.</p>
+  </div>
+
+  <label class="field">
+    <input type="checkbox" id="consentAccepted">
+    I have read and understand the information above, and I voluntarily agree to participate.
+  </label>
+
+  <div id="consentError" class="error"></div>
+
+  <button id="consentBtn" onclick="acceptConsent()">Accept & Continue</button>
+  <button class="secondary" onclick="show('welcome')">Decline</button>
+</section>
 <section class="screen" id="salc">
 <div class="eyebrow">SHARED ROSC LOGIN</div>
 <h2>Confirm your SALC identity</h2>
@@ -105,7 +127,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <script>
 const DEFAULT_PERIOD='Baseline2026Q2';
-const state={hashid:'',unit:'',role:'',shift:'',answers:{},period:new URLSearchParams(location.search).get('period')||DEFAULT_PERIOD};
+const state={hashid:'',unit:'',role:'',shift:'',answers:{},consentId:''period:new URLSearchParams(location.search).get('period')||DEFAULT_PERIOD};
 const $=id=>document.getElementById(id);
 
 async function api(endpoint,method,body){
@@ -141,7 +163,35 @@ async function loadConfig(){
   console.warn('Could not load unit list',e);
  }
 }
+async function acceptConsent(){
+  const checkbox=$('consentAccepted');
+  const error=$('consentError');
+  const btn=$('consentBtn');
 
+  if(!checkbox.checked){
+    error.textContent='Please confirm your agreement before continuing.';
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent='Recording consent…';
+  error.textContent='';
+
+  try{
+    const result=await api('consent','POST',{
+      surveyType:'standard'
+    });
+
+    state.consentId=result.consentId;
+    show('salc');
+
+  }catch(e){
+    error.textContent='We could not record your consent. Please try again.';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='Accept & Continue';
+  }
+}
 async function submitSALC(){
  const vals=[1,2,3,4,5].map(i=>$('s'+i).value.trim());
  const tests=[/^[a-z]{2}$/i,/^\d{2}$/,/^\d{1,2}$/,/^[a-z]{2}$/i,/^[a-z]$/i];
@@ -158,9 +208,10 @@ async function submitSALC(){
 
  try{
   const result=await api('hash','POST',{
-   a1:vals[0],a2:vals[1],a3:vals[2],a4:vals[3],a5:vals[4],
-   unit:'',role:'',shift:''
-  });
+  consentId:state.consentId,
+  a1:vals[0],a2:vals[1],a3:vals[2],a4:vals[3],a5:vals[4],
+  unit:'',role:'',shift:''
+});
   state.hashid=result.hashid;
   show('demographics');
  }catch(e){
@@ -303,6 +354,7 @@ async function submitSurvey(){
 
  const payload={
   hashid:state.hashid,
+  consentId:state.consentId,
   unit:state.unit,
   role:state.role,
   shift:state.shift,
