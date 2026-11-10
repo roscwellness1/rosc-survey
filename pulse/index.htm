@@ -116,7 +116,7 @@ p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
     </div>
     <p class="muted" id="token-context">Preparing your check-in…</p>
     <div class="actions">
-      <button class="btn" id="btn-token-start" onclick="show('screen-pulse')" disabled>Start check-in</button>
+      <button class="btn" id="btn-token-start" onclick="show('screen-consent')" disabled>Start check-in</button>
     </div>
   </section>
 
@@ -140,11 +140,39 @@ p.muted { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
     </div>
     <p class="muted">Your input is part of a longitudinal measurement of clinician well-being. The more often you check in, the more accurate the unit's picture.</p>
     <div class="actions">
-      <button class="btn" onclick="show('screen-salc')">Start check-in</button>
+      <button class="btn" onclick="show('screen-consent')">Start check-in</button>
     </div>
   </section>
 
   <!-- ===== SALC ID ===== -->
+  <!-- ===== INFORMED CONSENT ===== -->
+<section class="screen" id="screen-consent">
+  <div class="eyebrow">INFORMED CONSENT</div>
+  <h2>Your participation is voluntary.</h2>
+  <p class="muted">Before continuing, please review the following:</p>
+
+  <div class="note">
+    <p><strong>Purpose:</strong> ROSC Workforce Intelligence collects anonymous workforce feedback to understand clinician experiences and identify trends.</p>
+    <p><strong>Voluntary participation:</strong> Participation is your choice. You may stop at any time before submitting your check-in.</p>
+    <p><strong>Privacy:</strong> Responses are analyzed in aggregate. Reports suppress subgroup results with fewer than five respondents.</p>
+    <p><strong>Confidentiality:</strong> Your SALC answers generate a coded identifier and are not included in your check-in responses.</p>
+    <p><strong>Questions:</strong> You may contact the ROSC Workforce Intelligence team with questions about this check-in.</p>
+  </div>
+
+  <div class="field">
+    <label>
+      <input type="checkbox" id="consentAccepted">
+      I have read and understand the information above, and I voluntarily agree to participate.
+    </label>
+  </div>
+
+  <div id="consentError" class="error"></div>
+
+  <div class="actions">
+    <button class="btn" id="consentBtn" onclick="acceptConsent()">Accept & Continue</button>
+    <button class="btn secondary" onclick="show('screen-welcome')">Decline</button>
+  </div>
+</section>
   <section class="screen" id="screen-salc">
     <div class="eyebrow">STEP 1 OF 4 · ANONYMOUS ID</div>
     <h2>Five quick questions to link this check-in to your previous ones.</h2>
@@ -322,6 +350,7 @@ const state = {
   answers: {},
   opentext: '',
   token: null
+  consentId: ''
 };
 
 // ---- API helper ----
@@ -441,13 +470,47 @@ function validateSalc() {
   }
   return ok;
 }
+async function acceptConsent() {
+  const checkbox = document.getElementById('consentAccepted');
+  const btn = document.getElementById('consentBtn');
+  const errorBox = document.getElementById('consentError');
 
+  if (!checkbox.checked) {
+    errorBox.textContent = 'Please confirm your agreement before continuing.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Recording consent…';
+  errorBox.textContent = '';
+
+  try {
+    const data = await api('consent', 'POST', {
+      surveyType: state.token ? 'pulse' : 'standard',
+      ...(state.token ? { token: state.token } : {})
+    });
+
+    state.consentId = data.consentId;
+
+    if (state.token) {
+      show('screen-pulse');
+    } else {
+      show('screen-salc');
+    }
+  } catch (e) {
+    errorBox.textContent = 'We could not record your consent. Please try again.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Accept & Continue';
+  }
+}
 async function submitSALC() {
   if (!validateSalc()) return;
   const btn = document.getElementById('btn-salc-continue');
   btn.disabled = true; btn.textContent = 'Linking…';
   try {
-    const data = await api('hash', 'POST', {
+const data = await api('hash', 'POST', {
+  consentId: state.consentId,
       a1: document.getElementById('a1').value,
       a2: document.getElementById('a2').value,
       a3: document.getElementById('a3').value,
@@ -518,6 +581,7 @@ async function submitPulse() {
     q4: state.answers.q4, q5: state.answers.q5,
     opentext: state.opentext,
   };
+  payload.consentId = state.consentId;
   if (state.token) {
     payload.token = state.token;  // backend derives hashid from token
   } else {
