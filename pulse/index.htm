@@ -395,8 +395,7 @@ function error(title, msg) {
 // ---- Init: token flow if ?t=TOKEN present, else classic SALC flow ----
 async function init() {
   const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('t');
-
+const token = urlParams.get('token') || urlParams.get('t');
   // ===== Token flow =====
   if (token) {
     state.token = token;
