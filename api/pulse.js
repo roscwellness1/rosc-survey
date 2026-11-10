@@ -33,7 +33,7 @@ if (!["config", "hash", "consent", "pulse"].includes(endpoint)) {
     const response = await fetch(url.toString(), options);
     const result = await response.json();
 
-    return res.status(200).json(result);
+    return res.status(response.status).json(result);
   } catch (error) {
     return res.status(502).json({
       error: "Backend connection failed"
