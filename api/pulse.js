@@ -20,7 +20,9 @@ if (!["config", "hash", "consent", "pulse", "token"].includes(endpoint)) {
     const url = new URL(backendUrl);
     url.searchParams.set("endpoint", endpoint);
     url.searchParams.set("key", apiKey);
-
+if (req.query.t) {
+  url.searchParams.set("t", req.query.t);
+}
     const options = { method: req.method };
 
     if (req.method === "POST") {
